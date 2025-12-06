@@ -1,88 +1,345 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Mortgage Calculator</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- Connect to your engine file -->
-<script src="https://raw.githubusercontent.com/fixvity/Fixvity-Calculators-/main/calculator.js"></script>
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-body { font-family: Arial; padding: 20px; }
-h1 { color: #005c99; }
+  :root{
+    --accent:#0b6ea8;
+    --bg:#f7fafc;
+    --card:#fff;
+    --muted:#666;
+    --success:#2a9c3f;
+  }
+  html,body{height:100%;margin:0;font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);color:#111}
+  .container{max-width:1100px;margin:28px auto;padding:18px;}
+  .grid{display:grid;gap:16px;grid-template-columns:1fr;align-items:start;}
+  header h1{margin:0 0 6px;font-size:28px;color:var(--accent)}
+  header p{margin:0;color:var(--muted)}
+
+  .card{background:var(--card);border-radius:10px;padding:16px;box-shadow:0 6px 18px rgba(13,30,45,0.06)}
+  .form-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+  .field{flex:1;min-width:160px}
+  label{display:block;font-size:13px;margin-bottom:6px;color:var(--muted)}
+  input[type=number], input[type=text], select{width:100%;padding:10px;border-radius:6px;border:1px solid #e3e8ee;font-size:15px;box-sizing:border-box}
+  .btn{display:inline-block;padding:10px 18px;background:var(--accent);color:#fff;border-radius:8px;border:none;cursor:pointer;font-weight:600}
+  .btn.secondary{background:#fff;color:var(--accent);border:1px solid #e3e8ee}
+  .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px}
+  .results{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
+  .stat{background:#f6fbff;padding:12px;border-radius:8px;min-width:180px}
+  .stat h3{margin:0;font-size:18px}
+  .muted{color:var(--muted);font-size:13px}
+
+  /* chart + table area */
+  .visual{display:grid;grid-template-columns:1fr;gap:12px;margin-top:16px}
+  canvas{background:#fff;border-radius:8px;padding:8px}
+
+  table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden}
+  th,td{padding:10px;border-bottom:1px solid #f2f4f7;text-align:left;font-size:14px}
+  th{background:#fafcff;color:var(--muted)}
+  .small{font-size:13px;color:var(--muted)}
+
+  /* responsive for desktop */
+  @media(min-width:900px){
+    .grid{grid-template-columns:420px 1fr}
+    .visual{grid-template-columns:1fr 420px}
+  }
+  .actions{display:flex;gap:8px;align-items:center}
+  .download{background:#0f766e;color:#fff;padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
+  .note{font-size:13px;color:var(--muted);margin-top:8px}
 </style>
 </head>
-
 <body>
+  <div class="container">
+    <header>
+      <h1>Mortgage Calculator</h1>
+      <p class="muted">Monthly payment, amortization schedule, extra payments, and chart — responsive for mobile and desktop.</p>
+    </header>
 
+    <div class="grid">
+      <!-- left: inputs -->
+      <div class="card">
+        <div class="field">
+          <label>Loan amount (principal)</label>
+          <input id="loan" type="number" placeholder="e.g. 250000" value="250000" min="0" />
+        </div>
 
+        <div class="form-row">
+          <div class="field">
+            <label>Annual interest rate (%)</label>
+            <input id="rate" type="number" placeholder="e.g. 3.75" step="0.01" value="3.75" min="0" />
+          </div>
+          <div class="field">
+            <label>Term (years)</label>
+            <input id="years" type="number" placeholder="e.g. 30" value="30" min="1" />
+          </div>
+        </div>
 
-<!-- START: calculator UI -->
-<h1>Mortgage Calculator</h1>
+        <div class="form-row">
+          <div class="field">
+            <label>Payments per year</label>
+            <select id="freq">
+              <option value="12" selected>Monthly (12)</option>
+              <option value="4">Quarterly (4)</option>
+              <option value="2">Semiannual (2)</option>
+              <option value="1">Yearly (1)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Extra payment per period (optional)</label>
+            <input id="extra" type="number" placeholder="e.g. 100" value="0" />
+          </div>
+        </div>
 
-<div id="mortgage-app" style="max-width:420px;">
-  <label>Loan amount (principal)</label><br>
-  <input id="loan" type="number" placeholder="e.g. 250000" style="width:100%;padding:8px;margin:6px 0;border:1px solid #ccc;border-radius:4px">
+        <div class="controls">
+          <button id="calcBtn" class="btn">Calculate</button>
+          <button id="resetBtn" class="btn secondary">Reset</button>
+          <div style="margin-left:auto" class="actions">
+            <button id="exportCsv" class="download">Export CSV</button>
+          </div>
+        </div>
 
-  <label>Annual interest rate (%)</label><br>
-  <input id="rate" type="number" step="0.01" placeholder="e.g. 3.75" style="width:100%;padding:8px;margin:6px 0;border:1px solid #ccc;border-radius:4px">
+        <p class="note">Tip: enter extra payment to see impact on total interest and payoff time.</p>
+      </div>
 
-  <label>Term (years)</label><br>
-  <input id="years" type="number" placeholder="e.g. 30" style="width:100%;padding:8px;margin:6px 0;border:1px solid #ccc;border-radius:4px">
+      <!-- right: results -->
+      <div>
+        <div class="card">
+          <div class="results" id="summary">
+            <div class="stat">
+              <div class="small">Monthly payment</div>
+              <h3 id="monthly">$0.00</h3>
+              <div class="small muted">Includes regular payment (not extra)</div>
+            </div>
+            <div class="stat">
+              <div class="small">Total payment</div>
+              <h3 id="total">$0.00</h3>
+              <div class="small muted">Sum of all payments (principal + interest)</div>
+            </div>
+            <div class="stat">
+              <div class="small">Total interest</div>
+              <h3 id="interest">$0.00</h3>
+              <div class="small muted">Interest paid over loan life</div>
+            </div>
+          </div>
 
-  <button id="calcBtn" style="width:100%;padding:10px;margin-top:10px;background:#005c99;color:#fff;border:none;border-radius:6px;cursor:pointer">
-    Calculate
-  </button>
+          <div class="visual" style="margin-top:12px">
+            <div class="card" style="padding:12px;">
+              <canvas id="balanceChart" height="260"></canvas>
+            </div>
 
-  <div id="mortgage-results" style="margin-top:12px;padding:10px;border-radius:6px;background:#f7f9fb;border:1px solid #e6eef6;display:none">
-    <div><strong>Monthly payment:</strong> <span id="monthly">—</span></div>
-    <div><strong>Total payment:</strong> <span id="total">—</span></div>
-    <div><strong>Total interest:</strong> <span id="interest">—</span></div>
-  </div>
-</div>
-<!-- END: calculator UI -->
+            <div class="card" style="padding:12px;">
+              <strong>Key info</strong>
+              <p class="muted" id="payoffInfo">Payoff: —</p>
+              <p class="muted" id="periodsInfo">Periods: —</p>
+              <p class="muted">You can export the full amortization schedule as CSV.</p>
+            </div>
+          </div>
+
+        </div>
+
+        <div style="margin-top:14px" class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <strong>Amortization schedule</strong>
+            <div class="small muted">Click "Export CSV" to download the table</div>
+          </div>
+
+          <div style="overflow:auto;max-height:420px">
+            <table id="amortTable">
+              <thead>
+                <tr><th>#</th><th>Payment</th><th>Interest</th><th>Principal</th><th>Extra</th><th>Balance</th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+        </div>
+      </div><!-- right column -->
+    </div><!-- grid -->
+  </div><!-- container -->
 
 <script>
-  // small helper to format money
-  function fmt(n){ return Number(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
+/* Helpers */
+function fmt(n){ return n === null || isNaN(n) ? '-' : ('$' + Number(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})); }
+function parseFloatOr0(v){ const n = parseFloat(v); return isNaN(n) ? 0 : n; }
 
-  // wire the button (this uses your external engine too if present)
-  document.addEventListener('DOMContentLoaded', function(){
-    const btn = document.getElementById('calcBtn');
-    btn.addEventListener('click', function(){
-      const P = parseFloat(document.getElementById('loan').value) || 0;
-      const annualRate = parseFloat(document.getElementById('rate').value) || 0;
-      const years = parseFloat(document.getElementById('years').value) || 0;
+/* Calculation and UI wiring */
+const loanEl = document.getElementById('loan');
+const rateEl = document.getElementById('rate');
+const yearsEl = document.getElementById('years');
+const freqEl = document.getElementById('freq');
+const extraEl = document.getElementById('extra');
+const calcBtn = document.getElementById('calcBtn');
+const resetBtn = document.getElementById('resetBtn');
+const exportBtn = document.getElementById('exportCsv');
 
-      const r = annualRate / 100 / 12;                 // monthly rate
-      const n = years * 12;                             // total months
+const monthlyEl = document.getElementById('monthly');
+const totalEl = document.getElementById('total');
+const interestEl = document.getElementById('interest');
+const amortTableBody = document.querySelector('#amortTable tbody');
+const payoffInfo = document.getElementById('payoffInfo');
+const periodsInfo = document.getElementById('periodsInfo');
 
-      let monthly = 0;
-      if (r === 0) { monthly = P / n; }                 // zero interest
-      else { monthly = P * r / (1 - Math.pow(1 + r, -n)); }
+let chart = null;
 
-      const total = monthly * n;
-      const interest = total - P;
+function computeAmortization(P, annualPct, years, freq, extra){
+  const r = annualPct / 100 / freq;          // periodic rate
+  const n = years * freq;                    // total periods
+  const schedule = [];
 
-      document.getElementById('monthly').textContent = '$' + fmt(monthly);
-      document.getElementById('total').textContent   = '$' + fmt(total);
-      document.getElementById('interest').textContent= '$' + fmt(interest);
+  let payment = 0;
+  if (r === 0){
+    payment = P / n;
+  } else {
+    payment = P * (r / (1 - Math.pow(1 + r, -n)));
+  }
 
-      document.getElementById('mortgage-results').style.display = 'block';
+  let balance = P;
+  let period = 0;
+  let totalInterest = 0;
+  let totalPayment = 0;
 
-      // if you have an engine function in calculator.js you can call it here (optional)
-      if (typeof example === 'function') {
-        // example() returns a string in your starter file — we keep it harmless
-        console.log('engine says:', example());
-      }
+  while(balance > 0.0005 && period < 100000){
+    period++;
+    const interest = balance * r;
+    let principal = payment - interest;
+    if (principal < 0) principal = 0;
+
+    // apply extra but don't overpay
+    let extraPay = extra || 0;
+    if (principal + extraPay > balance){
+      extraPay = Math.max(0, balance - principal);
+    }
+
+    let actualPayment = principal + interest + extraPay;
+    balance = Math.max(0, balance - principal - extraPay);
+
+    schedule.push({
+      period,
+      payment: actualPayment,
+      interest,
+      principal,
+      extra: extraPay,
+      balance,
     });
+
+    totalInterest += interest;
+    totalPayment += actualPayment;
+
+    // Safety: break if tiny rounding
+    if (schedule.length > n*3) break;
+  }
+
+  return { schedule, payment: payment, totalInterest, totalPayment, periods: schedule.length };
+}
+
+function renderResults(res){
+  monthlyEl.textContent = fmt(res.payment);
+  totalEl.textContent = fmt(res.totalPayment);
+  interestEl.textContent = fmt(res.totalInterest);
+
+  periodsInfo.textContent = res.periods + ' payments';
+  const last = res.schedule[res.schedule.length-1];
+  const payDate = last ? last.period : '-';
+  payoffInfo.textContent = 'Loan will be paid off in ' + res.periods + ' periods.';
+
+  // fill table
+  amortTableBody.innerHTML = '';
+  res.schedule.forEach(row=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td>' + row.period + '</td>' +
+      '<td>' + fmt(row.payment) + '</td>' +
+      '<td>' + fmt(row.interest) + '</td>' +
+      '<td>' + fmt(row.principal) + '</td>' +
+      '<td>' + fmt(row.extra) + '</td>' +
+      '<td>' + fmt(row.balance) + '</td>';
+    amortTableBody.appendChild(tr);
   });
-</script>
 
-<script>
-console.log(example());
-</script>
+  // draw chart (balance over time)
+  const labels = res.schedule.map(s=>'#'+s.period);
+  const balances = res.schedule.map(s=>s.balance);
+  const ctx = document.getElementById('balanceChart').getContext('2d');
+  if (chart) chart.destroy();
+  chart = new Chart(ctx, {
+    type: 'line',
+    data:{
+      labels,
+      datasets:[
+        { label:'Remaining Balance', data:balances, borderColor:'#0b6ea8', backgroundColor:'rgba(11,110,168,0.06)', fill:true, tension:0.3 }
+      ]
+    },
+    options:{
+      plugins:{legend:{display:false}},
+      scales:{y:{ticks:{callback: val => '$' + Number(val).toLocaleString()}}}
+    }
+  });
+}
 
+function handleCalculate(){
+  const P = parseFloatOr0(loanEl.value);
+  const annual = parseFloatOr0(rateEl.value);
+  const years = parseFloatOr0(yearsEl.value);
+  const freq = Number(freqEl.value);
+  const extra = parseFloatOr0(extraEl.value);
+  if (P <= 0 || years <= 0) {
+    alert('Enter valid loan amount and term (years).');
+    return;
+  }
+
+  const res = computeAmortization(P, annual, years, freq, extra);
+  renderResults(res);
+  // store last results for export
+  window._lastCalc = { res, input:{P,annual,years,freq,extra} };
+}
+
+function handleReset(){
+  loanEl.value = 250000;
+  rateEl.value = 3.75;
+  yearsEl.value = 30;
+  freqEl.value = 12;
+  extraEl.value = 0;
+  amortTableBody.innerHTML = '';
+  monthlyEl.textContent = '$0.00';
+  totalEl.textContent = '$0.00';
+  interestEl.textContent = '$0.00';
+  if (chart) chart.destroy();
+  payoffInfo.textContent = 'Payoff: —';
+  periodsInfo.textContent = 'Periods: —';
+  window._lastCalc = null;
+}
+
+function exportCSV(){
+  const data = window._lastCalc;
+  if (!data) { alert('No calculation yet. Click Calculate first.'); return; }
+  const rows = [['Period','Payment','Interest','Principal','Extra','Balance']];
+  data.res.schedule.forEach(s=>{
+    rows.push([s.period, s.payment.toFixed(2), s.interest.toFixed(2), s.principal.toFixed(2), s.extra.toFixed(2), s.balance.toFixed(2)]);
+  });
+  const csv = rows.map(r => r.join(',')).join('\\n');
+  const blob = new Blob([csv],{type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'amortization.csv';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+/* events */
+calcBtn.addEventListener('click', handleCalculate);
+resetBtn.addEventListener('click', handleReset);
+exportBtn.addEventListener('click', exportCSV);
+
+/* initial */
+handleReset();
+</script>
 </body>
 </html>
