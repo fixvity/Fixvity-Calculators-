@@ -18,7 +18,67 @@ h1 { color: #005c99; }
 
 <h1>Mortgage Calculator</h1>
 
-<p>This is a placeholder. Your full calculator UI will be added here.</p>
+<!-- START: calculator UI -->
+<h1>Mortgage Calculator</h1>
+
+<div id="mortgage-app" style="max-width:420px;">
+  <label>Loan amount (principal)</label><br>
+  <input id="loan" type="number" placeholder="e.g. 250000" style="width:100%;padding:8px;margin:6px 0;border:1px solid #ccc;border-radius:4px">
+
+  <label>Annual interest rate (%)</label><br>
+  <input id="rate" type="number" step="0.01" placeholder="e.g. 3.75" style="width:100%;padding:8px;margin:6px 0;border:1px solid #ccc;border-radius:4px">
+
+  <label>Term (years)</label><br>
+  <input id="years" type="number" placeholder="e.g. 30" style="width:100%;padding:8px;margin:6px 0;border:1px solid #ccc;border-radius:4px">
+
+  <button id="calcBtn" style="width:100%;padding:10px;margin-top:10px;background:#005c99;color:#fff;border:none;border-radius:6px;cursor:pointer">
+    Calculate
+  </button>
+
+  <div id="mortgage-results" style="margin-top:12px;padding:10px;border-radius:6px;background:#f7f9fb;border:1px solid #e6eef6;display:none">
+    <div><strong>Monthly payment:</strong> <span id="monthly">—</span></div>
+    <div><strong>Total payment:</strong> <span id="total">—</span></div>
+    <div><strong>Total interest:</strong> <span id="interest">—</span></div>
+  </div>
+</div>
+<!-- END: calculator UI -->
+
+<script>
+  // small helper to format money
+  function fmt(n){ return Number(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+  // wire the button (this uses your external engine too if present)
+  document.addEventListener('DOMContentLoaded', function(){
+    const btn = document.getElementById('calcBtn');
+    btn.addEventListener('click', function(){
+      const P = parseFloat(document.getElementById('loan').value) || 0;
+      const annualRate = parseFloat(document.getElementById('rate').value) || 0;
+      const years = parseFloat(document.getElementById('years').value) || 0;
+
+      const r = annualRate / 100 / 12;                 // monthly rate
+      const n = years * 12;                             // total months
+
+      let monthly = 0;
+      if (r === 0) { monthly = P / n; }                 // zero interest
+      else { monthly = P * r / (1 - Math.pow(1 + r, -n)); }
+
+      const total = monthly * n;
+      const interest = total - P;
+
+      document.getElementById('monthly').textContent = '$' + fmt(monthly);
+      document.getElementById('total').textContent   = '$' + fmt(total);
+      document.getElementById('interest').textContent= '$' + fmt(interest);
+
+      document.getElementById('mortgage-results').style.display = 'block';
+
+      // if you have an engine function in calculator.js you can call it here (optional)
+      if (typeof example === 'function') {
+        // example() returns a string in your starter file — we keep it harmless
+        console.log('engine says:', example());
+      }
+    });
+  });
+</script>
 
 <script>
 console.log(example());
