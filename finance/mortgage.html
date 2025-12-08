@@ -22,36 +22,37 @@
   /* GLOBAL */
   *{box-sizing:border-box}
   html,body{
-    height:100%;margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;color:#111;
-    background:var(--bg);-webkit-font-smoothing:antialiased;overflow-x:hidden !important;
+    height:100%; margin:0; padding:0;
+    font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+    color:#111; background:var(--bg); -webkit-font-smoothing:antialiased;
+    overflow-x:hidden; /* prevent horizontal page scroll */
   }
   a{color:var(--accent);text-decoration:none}
 
-  /* outer container: reduced side padding so mobile shows no thin gutter */
+  /* outer container */
   .wrap{
     max-width:var(--container-max);
     margin:18px auto;
-    padding:12px;            /* reduced from 18 to 12 to avoid overflow/gutter */
-    overflow-x:hidden;
+    padding:12px 12px;               /* tighter padding prevents side gutter on mobile */
+    overflow:hidden;                 /* important to hide accidental overflow */
   }
 
   header h1{margin:0;font-size:32px;color:var(--accent)}
   header p.lead{margin:8px 0 14px;color:var(--muted);font-size:15px}
 
-  /* cards */
   .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:16px;overflow:visible}
 
-  /* two-column grid */
+  /* grid */
   .grid{display:grid;gap:16px;grid-template-columns:1fr 420px;align-items:start}
   @media (max-width:1024px){ .grid{grid-template-columns:1fr;} }
 
-  /* forms */
+  /* form fields */
   .form-row{display:flex;gap:12px;flex-wrap:wrap}
-  .col{flex:1;min-width:0}           /* critical: prevents children from overflowing flex container */
+  .col{flex:1;min-width:0} /* critical to prevent overflow in flex items */
   .form-group{margin-bottom:12px}
   label{display:block;font-size:14px;color:var(--muted);margin-bottom:8px}
   input[type="text"], input[type="number"], select, textarea{
-    width:100%;padding:12px;border:1px solid #e5e7eb;border-radius:8px;font-size:16px;background:#fff;box-sizing:border-box;
+    width:100%; padding:12px; border:1px solid #e5e7eb; border-radius:8px; font-size:16px; background:#fff;
   }
   .small{font-size:13px;color:var(--muted)}
 
@@ -65,39 +66,39 @@
   .result-row h3{margin:0;color:var(--accent);font-size:16px}
   .result-row .value{font-weight:700;font-size:18px}
 
-  /* chart boxes: responsive height using clamp() */
+  /* charts: responsive heights, smaller padding on mobile */
   .chartWrap{background:var(--card);padding:8px;border-radius:8px;box-shadow:var(--shadow);overflow:hidden}
-  .chartBox{height:clamp(200px, 30vh, 320px); position:relative;} /* shrinks on small screens */
-  .chartBox.tall{height:clamp(240px, 40vh, 380px)}
-
-  /* ensure canvases fill container */
+  .chartBox{height:clamp(200px, 28vh, 340px); position:relative;}
+  .chartBox.tall{height:clamp(260px, 40vh, 420px)}
   canvas{ width:100% !important; height:100% !important; display:block; }
 
-  /* table area: horizontal scroll on small screens, avoid gutter */
-  .tableWrap{margin-top:10px;overflow:auto;background:transparent;-webkit-overflow-scrolling:touch;padding:0}
-  /* smaller min-width to prevent excessive horizontal scrolling but keep layout */
-  table{width:100%;border-collapse:collapse;min-width:560px}
-  th,td{padding:10px;border-bottom:1px solid #eef2f7;text-align:left}
-  th{background:#2f6b9f;color:#fff;position:relative}
-  /* narrow first column so table uses space efficiently on small screens */
-  table th:first-child, table td:first-child{width:56px;padding-left:10px;padding-right:10px;text-align:center}
-  /* slightly reduce padding on very small screens */
+  /* table area */
+  .tableWrap{margin-top:10px; overflow:auto; background:transparent; -webkit-overflow-scrolling:touch; padding:0}
+  /* Make table width 100% and let it horizontally scroll inside wrapper when necessary.
+     Setting min-width prevents extreme wrapping but we keep it reasonable. */
+  table{width:100%; border-collapse:collapse; min-width:460px}
+  th,td{padding:10px;border-bottom:1px solid #eef2f7;text-align:left; vertical-align:middle; white-space:nowrap}
+  th{background:#2f6b9f;color:#fff}
+  /* reduce first-column width so table uses space efficiently */
+  table th:first-child, table td:first-child{width:56px;text-align:center;padding-left:10px;padding-right:10px}
+
+  /* small screens: allow text wrapping for long labels and reduce paddings */
   @media (max-width:480px){
     header h1{font-size:24px}
     input[type="number"], input[type="text"]{font-size:14px;padding:10px}
-    table{min-width:480px}
-    th,td{padding:8px;font-size:13px}
+    th,td{padding:8px;font-size:13px; white-space:normal} /* allow wrapping in very small screens */
+    table{min-width:420px}
   }
 
   /* mobile stacking for form fields */
   @media (max-width:600px){
     .form-row{flex-direction:column;gap:10px}
     .form-row .col{width:100%;min-width:0}
-    .wrap{padding-left:10px;padding-right:10px} /* extra safety */
+    .wrap{padding-left:10px;padding-right:10px}
   }
 
-  /* small visual polish: remove white gutters around table card */
-  .tableWrap.card{box-shadow:none;padding:0;border-radius:10px}
+  /* remove extra margins that cause white gutter artifacts */
+  .card, .chartWrap, .tableWrap { box-sizing:border-box; }
 
   /* print */
   @media print{
@@ -299,7 +300,7 @@ function formatCurrency(v){
 }
 function toNumber(v){ const n = parseFloat(v); return isNaN(n) ? 0 : n; }
 
-/* populate month select */
+/* populate months */
 (function fillMonths(){
   const sel = document.getElementById('startMonth');
   sel.innerHTML = '';
@@ -351,7 +352,7 @@ let amortChart = null;
 let lastResult = null;
 let activeView = 'monthly';
 
-/* ------------------------- Core schedule computation ------------------------- */
+/* ------------------------- schedule compute ------------------------- */
 function computeSchedule(opts){
   const { loanAmount, annualRate, termYears, paymentsPerYear, extraMonthly, extraYearly, extraOneTime, startMonth, startYear } = opts;
   const P = loanAmount;
@@ -359,8 +360,7 @@ function computeSchedule(opts){
   const n = Math.max(1, Math.round(termYears * paymentsPerYear));
   const regularPayment = (r===0) ? (P/n) : (P * (r / (1 - Math.pow(1+r, -n))));
 
-  let balance = P;
-  let period = 0;
+  let balance = P, period = 0;
   const schedule = [];
   let curMonth = startMonth, curYear = startYear;
 
@@ -373,8 +373,7 @@ function computeSchedule(opts){
     period++;
     const interest = balance * r;
     let principal = Math.max(0, regularPayment - interest);
-    let extraThis = 0;
-    extraThis += extraPeriod;
+    let extraThis = extraPeriod;
     if (Number(extraYearly) && curMonth === Number(startMonth)) extraThis += Number(extraYearly);
     if (period === 1 && Number(extraOneTime)) extraThis += Number(extraOneTime);
     if (principal + extraThis > balance) extraThis = Math.max(0, balance - principal);
@@ -396,7 +395,6 @@ function computeSchedule(opts){
   const totalPayment = schedule.reduce((s,x)=>s+x.payment,0);
   const totalInterest = schedule.reduce((s,x)=>s+x.interest,0);
 
-  // annual grouping
   const annualMap = {};
   schedule.forEach(s=>{
     const y = s.date.year;
@@ -408,14 +406,13 @@ function computeSchedule(opts){
   return { schedule, annual, payment: regularPayment, totalPayment, totalInterest, periods: schedule.length };
 }
 
-/* ------------------------- Rendering helpers ------------------------- */
+/* ------------------------- render chart ------------------------- */
 function renderChart(schedule){
   const labels = schedule.map(s=>s.date.label);
   const balances = schedule.map(s=>s.balance);
   const interests = schedule.map(s=>s.interest);
   const payments = schedule.map(s=>s.payment);
 
-  // destroy old chart if exists
   if (amortChart) amortChart.destroy();
 
   amortChart = new Chart(amortCtxEl.getContext('2d'), {
@@ -423,47 +420,59 @@ function renderChart(schedule){
     data:{
       labels,
       datasets:[
-        {label:'Balance',data:balances,borderColor:'#1f77b4',backgroundColor:'rgba(31,111,182,0.08)',fill:true,tension:0.2},
-        {label:'Interest',data:interests,borderColor:'#7ac142',fill:false,tension:0.2},
-        {label:'Payment',data:payments,borderColor:'#d44',fill:false,tension:0.2}
+        {label:'Balance',data:balances,borderColor:'#1f77b4',backgroundColor:'rgba(31,111,182,0.08)',fill:true,tension:0.25},
+        {label:'Interest',data:interests,borderColor:'#7ac142',fill:false,tension:0.25},
+        {label:'Payment',data:payments,borderColor:'#d44',fill:false,tension:0.25}
       ]
     },
     options:{
       responsive:true,
-      maintainAspectRatio:false, // allow container to control height
-      plugins:{legend:{position:'top'}},
-      scales:{
-        x: {
-          ticks: { autoSkip:true, maxTicksLimit:6 }, // prevents label overlap on mobile
-        },
-        y: {
-          ticks:{ callback: v => formatCurrency(v) }
-        }
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{ position:'top', labels:{boxWidth:12,usePointStyle:true} }
       },
-      layout: { padding: { left: 4, right: 6, top: 6, bottom: 6 } }
+      layout:{ padding:{ left:6, right:6, top:6, bottom:6 } },
+      scales:{
+        x:{
+          ticks:{ autoSkip:true, maxTicksLimit:6, callback: function(val){ return this.getLabelForValue(val);} },
+          grid: { display:false }
+        },
+        y:{
+          ticks:{
+            maxTicksLimit:6,
+            callback: function(v){
+              // compact format (e.g., 50k, 100k) for mobile; full with currency symbol for larger view
+              try {
+                const cur = document.getElementById('currencyTop').value || 'USD';
+                const symbol = {USD:'$',EUR:'€',GBP:'£',CAD:'C$',AUD:'A$',JPY:'¥',INR:'₹'}[cur] || '$';
+                if (Math.abs(v) >= 1000) {
+                  // show in thousands with comma
+                  return symbol + Number(v).toLocaleString(undefined,{maximumFractionDigits:0});
+                }
+                return symbol + Number(v).toLocaleString(undefined,{maximumFractionDigits:2});
+              } catch(e){ return v; }
+            }
+          },
+          grid: { color:'rgba(15,25,40,0.06)' }
+        }
+      }
     }
   });
 
-  // Force a small delayed resize (fixes Elementor render timing)
-  setTimeout(()=>{ try { amortChart.resize(); } catch(e) {} }, 120);
+  // force a small deferred resize (improves rendering in builders/iframes)
+  setTimeout(()=>{ try{ amortChart.resize(); }catch(e){} }, 120);
 }
 
+/* ------------------------- render tables ------------------------- */
 function renderMonthlyTable(schedule){
   monthlyTableEl.innerHTML = '<table><thead><tr><th>#</th><th>Date</th><th>Payment</th><th>Interest</th><th>Principal</th><th>Extra</th><th>Ending Balance</th></tr></thead><tbody></tbody></table>';
   const tbody = monthlyTableEl.querySelector('tbody');
   schedule.forEach(s=>{
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${s.period}</td>
-      <td>${s.date.label}</td>
-      <td>${formatCurrency(s.payment)}</td>
-      <td>${formatCurrency(s.interest)}</td>
-      <td>${formatCurrency(s.principal)}</td>
-      <td>${formatCurrency(s.extra)}</td>
-      <td>${formatCurrency(s.balance)}</td>`;
+    tr.innerHTML = `<td>${s.period}</td><td>${s.date.label}</td><td>${formatCurrency(s.payment)}</td><td>${formatCurrency(s.interest)}</td><td>${formatCurrency(s.principal)}</td><td>${formatCurrency(s.extra)}</td><td>${formatCurrency(s.balance)}</td>`;
     tbody.appendChild(tr);
   });
 }
-
 function renderAnnualTable(annual){
   annualTableEl.style.display = 'block';
   annualTableEl.innerHTML = '<table><thead><tr><th>Year</th><th>Payment</th><th>Interest</th><th>Principal</th><th>Extra</th><th>Ending Balance</th></tr></thead><tbody></tbody></table>';
@@ -475,7 +484,7 @@ function renderAnnualTable(annual){
   });
 }
 
-/* ------------------------- Main calculate & wiring ------------------------- */
+/* ------------------------- main calculate & wiring ------------------------- */
 function calculate(){
   const home = toNumber(homePriceEl.value);
   const downPct = toNumber(downPctEl.value);
@@ -502,14 +511,16 @@ function calculate(){
   monthlyOut.textContent = formatCurrency(res.payment);
   totalOut.textContent = formatCurrency(res.totalPayment);
   interestOut.textContent = formatCurrency(res.totalInterest);
-  payoffOut.textContent = res.schedule.length ? res.schedule[res.schedule.length - 1].date.label : '-';
+  payoffOut.textContent = res.schedule.length ? res.schedule[res.schedule.length-1].date.label : '-';
 
   renderChart(res.schedule);
-  if (activeView === 'monthly') { annualTableEl.style.display='none'; renderMonthlyTable(res.schedule); }
-  else { renderAnnualTable(res.annual); monthlyTableEl.innerHTML=''; }
 
-  // clear any small horizontal scroll offset that shows thin gutter
-  document.querySelector('.wrap').scrollLeft = 0;
+  if (activeView === 'monthly'){ annualTableEl.style.display = 'none'; renderMonthlyTable(res.schedule); }
+  else { renderAnnualTable(res.annual); monthlyTableEl.innerHTML = ''; }
+
+  // ensure no page horizontal gap after rendering
+  document.documentElement.scrollLeft = 0;
+  document.body.scrollLeft = 0;
 }
 
 calcBtn.addEventListener('click', calculate);
@@ -519,7 +530,7 @@ resetBtn.addEventListener('click', ()=>{
   propTaxEl.value = 1.2; insuranceEl.value = 1500; pmiEl.value = 0; hoaEl.value = 0; otherCostsEl.value = 4000; costIncreaseEl.value = 0;
   extraMonthlyEl.value = 0; extraYearlyEl.value = 0; extraOneEl.value = 0;
   monthlyOut.textContent = formatCurrency(0); totalOut.textContent = formatCurrency(0); interestOut.textContent = formatCurrency(0); payoffOut.textContent = '-';
-  monthlyTableEl.innerHTML = ''; annualTableEl.innerHTML = ''; if (amortChart) { amortChart.destroy(); amortChart = null; } lastResult = null;
+  monthlyTableEl.innerHTML = ''; annualTableEl.innerHTML = ''; if (amortChart) { amortChart.destroy(); amortChart=null; } lastResult = null;
 });
 
 csvBtn.addEventListener('click', ()=>{
@@ -550,19 +561,18 @@ document.getElementById('currencyTop').addEventListener('change', ()=>{
   if (amortChart) renderChart(lastResult.schedule);
 });
 
-/* ensure charts resize properly in WP/Elementor */
-function safeResizeCharts(){ try{ if (amortChart) amortChart.resize(); }catch(e){} document.querySelector('.wrap').scrollLeft = 0; }
-window.addEventListener('resize', ()=>{ clearTimeout(window._resizeTimer); window._resizeTimer = setTimeout(safeResizeCharts, 120); });
-window.addEventListener('orientationchange', ()=> setTimeout(safeResizeCharts, 220) );
+/* resize safety for builders/iframes */
+function safeResize(){ try{ if (amortChart) amortChart.resize(); }catch(e){} document.documentElement.scrollLeft=0; document.body.scrollLeft=0; }
+window.addEventListener('resize', ()=>{ clearTimeout(window._rt); window._rt = setTimeout(safeResize, 120); });
+window.addEventListener('orientationchange', ()=> setTimeout(safeResize, 220));
 
 /* init */
 document.addEventListener('DOMContentLoaded', ()=>{
   startYearEl.value = new Date().getFullYear();
   startMonthEl.value = new Date().getMonth();
   calculate();
-  // two extra resize calls (Elementor sometimes renders in iframes)
-  setTimeout(safeResizeCharts, 140);
-  setTimeout(safeResizeCharts, 700);
+  setTimeout(safeResize, 140);
+  setTimeout(safeResize, 700);
 });
 </script>
 </body>
