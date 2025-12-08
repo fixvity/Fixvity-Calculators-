@@ -5,94 +5,104 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Mortgage Calculator — Fixvity</title>
 
-<!-- Chart.js -->
+<!-- Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
   :root{
-    --accent:#1f6fb6;
-    --bg:#f7fbfd;
-    --card:#ffffff;
-    --muted:#6b7280;
-    --radius:12px;
-    --shadow: 0 8px 28px rgba(10,20,30,0.06);
-    --container-max:1100px;
+    --accent:#0b6ea8;
+    --accent-2:#0f6a8a;
+    --bg:#f7fafc;
+    --card:#fff;
+    --muted:#666;
+    --success:#2a9c3f;
+    --danger:#d9534f;
+    --radius:10px;
+    --container-max:1200px;
   }
-  *{box-sizing:border-box}
-  html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;color:#111;background:var(--bg);-webkit-font-smoothing:antialiased}
-  a{color:var(--accent);text-decoration:none}
 
-  .wrap{max-width:var(--container-max);margin:22px auto;padding:18px;overflow-x:hidden}
-  header h1{margin:0;font-size:36px;color:var(--accent)}
-  header p.lead{margin:8px 0 18px;color:var(--muted);font-size:16px}
+  /* ===== GLOBAL / LAYOUT FIXES (prevent horizontal gutters/clipping) ===== */
+  html, body { height:100%; margin:0; font-family:Inter,Arial,Helvetica,sans-serif; background:var(--bg); color:#111; overflow-x: hidden !important; -webkit-font-smoothing:antialiased; }
+  .container{ max-width:var(--container-max); margin:22px auto; padding:18px; box-sizing:border-box; overflow-x: hidden; }
+  /* ensure inner wrapper doesn't cause an internal horizontal scroll/gutter */
+  .card { background:var(--card); border-radius:var(--radius); padding:14px; box-shadow:0 6px 18px rgba(13,30,45,0.06); overflow: visible; -webkit-overflow-scrolling: touch; }
 
-  .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin-bottom:18px;overflow:visible}
+  header h1{margin:0 0 6px;font-size:28px;color:var(--accent)}
+  header p{margin:0;color:var(--muted)}
 
-  .grid{display:grid;gap:18px;grid-template-columns:1fr 420px;align-items:start}
-  @media (max-width:1024px){ .grid{grid-template-columns:1fr;} }
+  /* grid */
+  .grid{ display:grid; gap:18px; grid-template-columns:1fr; align-items:start; }
+  @media(min-width:960px){ .grid{ grid-template-columns:420px 1fr; } }
 
-  .form-row{display:flex;gap:12px}
-  .col{flex:1;min-width:0}
-  .form-group{margin-bottom:12px}
-  label{display:block;font-size:14px;color:var(--muted);margin-bottom:8px}
-  input[type="text"], input[type="number"], select, textarea{width:100%;padding:12px;border:1px solid #e5e7eb;border-radius:8px;font-size:16px;background:#fff}
-  .small{font-size:13px;color:var(--muted)}
+  .form-row{ display:flex; gap:12px; flex-wrap:wrap; margin-bottom:12px; }
+  .field{ flex:1; min-width:140px; }
+  label{ display:block; font-size:13px; margin-bottom:6px; color:var(--muted) }
+  input[type=number], input[type=text], select{ width:100%; padding:10px; border-radius:6px; border:1px solid #e3e8ee; font-size:15px; box-sizing:border-box; background:#fff; }
 
-  .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
-  .btn{display:inline-block;padding:10px 16px;border-radius:8px;border:0;background:var(--accent);color:#fff;font-weight:600;cursor:pointer}
-  .btn.alt{background:#eef6fb;color:var(--accent);border:1px solid #dfeffb}
+  .btn{ display:inline-block; padding:10px 16px; background:var(--accent); color:#fff; border-radius:8px; border:none; cursor:pointer; font-weight:600; }
+  .btn.secondary{ background:#fff; color:var(--accent); border:1px solid #e3e8ee; }
 
-  .results{display:flex;flex-direction:column;gap:14px}
-  .result-row{display:flex;justify-content:space-between;align-items:center;background:#fff;padding:12px;border-radius:8px;border:1px solid #f1f5f9}
-  .result-row h3{margin:0;color:var(--accent);font-size:16px}
-  .result-row .value{font-weight:700;font-size:18px}
+  .controls{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:8px; }
+  .results{ display:flex; gap:12px; flex-wrap:wrap; margin-top:12px; }
 
-  .chartWrap{background:var(--card);padding:12px;border-radius:8px;box-shadow:var(--shadow);overflow:hidden}
-  .chartBox{height:260px; position:relative;}
-  .chartBox.tall{height:300px}
-  @media (max-width:600px){ .chartBox{height:220px} .chartBox.tall{height:260px} }
+  .stat{ background:#f6fbff; padding:12px; border-radius:8px; min-width:170px; }
+  .stat h3{ margin:0; font-size:18px }
+  .muted{ color:var(--muted); font-size:13px }
 
-  canvas{ width:100% !important; height:100% !important; display:block; }
+  .visual{ display:grid; grid-template-columns:1fr; gap:12px; margin-top:16px; }
+  @media(min-width:960px){ .visual{ grid-template-columns:1fr 420px; } }
 
-  .tableWrap{margin-top:10px;overflow:auto;background:transparent}
-  table{width:100%;border-collapse:collapse}
-  th,td{padding:10px;border-bottom:1px solid #eef2f7;text-align:left}
-  th{background:#2f6b9f;color:#fff}
-  .tableToggle{display:flex;gap:8px;align-items:center;margin-bottom:8px}
-  .tabBtn{padding:10px 14px;border-radius:8px;border:1px solid #dfe6ee;background:#f7fbff;cursor:pointer}
-  .tabBtn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  canvas{ background:#fff; border-radius:8px; padding:8px; display:block; width:100% !important; height:100% !important; box-sizing:border-box; }
 
+  table{ width:100%; border-collapse:collapse; background:#fff; border-radius:8px; overflow:hidden; }
+  th, td{ padding:8px; border-bottom:1px solid #f2f4f7; text-align:left; font-size:14px; box-sizing:border-box; }
+  th{ background:#2f6b9f; color:#fff; position:relative; }
+  .small{ font-size:13px; color:var(--muted); }
+
+  .tabs{ display:flex; gap:6px; margin-bottom:8px; }
+  .tab{ padding:8px 10px; border-radius:6px; background:#f2f6fa; cursor:pointer; }
+  .tab.active{ background:var(--accent); color:#fff; }
+
+  .toolbar{ display:flex; gap:10px; align-items:center; }
+  .toolbar .select{ margin-left:auto; display:flex; gap:8px; align-items:center; }
+
+  /* table wrapper: allow scroll on small screens, prevent clipping */
+  .tableWrap{ margin-top:10px; overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:6px; }
+
+  /* Prevent layout overflow from long tables while maintaining readability.
+     min-width ensures desktop layout stays consistent; adjust if necessary. */
+  .tableWrap table { min-width:640px; width:100%; margin:0; }
+
+  /* make the index column narrow to reduce horizontal pressure */
+  .tableWrap table td:first-child, .tableWrap table th:first-child { width:56px; text-align:center; padding-left:12px; padding-right:12px; }
+
+  /* mobile adjustments */
   @media (max-width:480px){
-    header h1{font-size:28px}
-    input[type="number"], input[type="text"]{font-size:15px;padding:10px}
+    header h1{ font-size:22px; }
+    .tableWrap table { min-width:520px; }
+    th, td { padding:8px; font-size:13px; }
   }
 
-  @media (max-width:600px){
-    .form-row{flex-direction:column;gap:10px}
-    .form-row .col{width:100%;min-width:0}
-    .grid{grid-template-columns:1fr}
-  }
-
+  /* print */
   @media print{
-    .controls, label, .small, .tabBtn { display:none !important; }
-    body{background:#fff}
-    .wrap{max-width:100%;padding:0}
+    .toolbar, .controls, input, select, button, .tabs { display:none !important; }
+    .container{ max-width:100%; padding:0; }
+    .card{ box-shadow:none; border-radius:0; padding:0; }
   }
 </style>
 </head>
 <body>
-  <div class="wrap">
+  <div class="container">
     <header>
       <h1>Mortgage Calculator</h1>
-      <p class="lead">Monthly payment, amortization schedule (monthly & annual), charts, currency & printable results.</p>
+      <p class="muted">Monthly payment, amortization (monthly & annual), extra payments, taxes & costs, and printable schedule.</p>
     </header>
 
-    <!-- toolbar: currency + print -->
-    <div class="card" style="margin-bottom:12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-      <div style="flex:1">
-        <div class="small">Currency & Format</div>
-        <select id="currencyTop" style="width:220px;padding:10px;border-radius:8px;border:1px solid #e6eef8">
-          <option value="USD">USD - $</option>
+    <div class="toolbar" style="margin:12px 0;">
+      <div style="margin-left:auto" class="toolbar-right">
+        <label class="small muted" style="margin-right:8px">Currency</label>
+        <select id="currency" style="padding:8px;border-radius:6px">
+          <option value="USD" selected>USD - $</option>
           <option value="EUR">EUR - €</option>
           <option value="GBP">GBP - £</option>
           <option value="CAD">CAD - C$</option>
@@ -100,194 +110,183 @@
           <option value="JPY">JPY - ¥</option>
           <option value="INR">INR - ₹</option>
         </select>
-      </div>
-      <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-        <button id="printBtn" class="btn alt">Print</button>
+        <button id="printBtn" class="btn secondary" style="margin-left:8px">Print</button>
       </div>
     </div>
 
     <div class="grid">
-      <!-- LEFT: Inputs -->
-      <div>
-        <div class="card">
-          <div style="display:flex;gap:12px;align-items:center;margin-bottom:8px">
-            <div style="flex:1">
-              <label>Home price</label>
-              <input id="homePrice" type="number" value="400000" />
-            </div>
-            <div style="width:140px">
-              <label>Down payment (%)</label>
-              <input id="downPct" type="number" value="20" min="0" max="100" />
-            </div>
+      <!-- left column: inputs -->
+      <div class="card">
+        <div style="display:flex;gap:12px;align-items:center;margin-bottom:8px">
+          <div style="flex:1">
+            <label>Home price</label>
+            <input id="homePrice" type="number" value="400000" />
           </div>
-
-          <div class="form-row">
-            <div class="col form-group">
-              <label>Loan term (years)</label>
-              <input id="termYears" type="number" value="30" min="1" />
-            </div>
-            <div class="col form-group">
-              <label>Interest rate (%)</label>
-              <input id="rate" type="number" value="6.228" step="0.001" />
-            </div>
-            <div class="col form-group">
-              <label>Payments per year</label>
-              <select id="freq">
-                <option value="12" selected>Monthly (12)</option>
-                <option value="26">Biweekly (26)</option>
-                <option value="24">Semi-monthly (24)</option>
-              </select>
-            </div>
+          <div style="width:120px">
+            <label>Down payment (%)</label>
+            <input id="downPct" type="number" value="20" min="0" max="100" />
           </div>
+        </div>
 
-          <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
-            <div style="flex:1">
-              <label>Start month</label>
-              <select id="startMonth"></select>
-            </div>
-            <div style="width:120px">
-              <label>Start year</label>
-              <input id="startYear" type="number" />
-            </div>
+        <div class="form-row">
+          <div class="field">
+            <label>Loan term (years)</label>
+            <input id="termYears" type="number" value="30" min="1" />
           </div>
-
-          <hr style="border:none;border-top:1px solid #eef2f6;margin:10px 0">
-
-          <div style="font-weight:700;margin-bottom:8px">Include Taxes & Costs</div>
-
-          <div class="form-row">
-            <div class="col form-group">
-              <label>Property tax (% / year)</label>
-              <input id="propTaxPct" type="number" value="1.2" step="0.01" />
-            </div>
-            <div class="col form-group">
-              <label>Home insurance (annual $)</label>
-              <input id="insurance" type="number" value="1500" />
-            </div>
+          <div class="field">
+            <label>Interest rate (%)</label>
+            <input id="rate" type="number" value="6.228" step="0.001" />
           </div>
-
-          <div class="form-row">
-            <div class="col form-group">
-              <label>PMI (annual $)</label>
-              <input id="pmi" type="number" value="0" />
-            </div>
-            <div class="col form-group">
-              <label>HOA (annual $)</label>
-              <input id="hoa" type="number" value="0" />
-            </div>
+          <div class="field">
+            <label>Payments per year</label>
+            <select id="freq">
+              <option value="12" selected>Monthly (12)</option>
+              <option value="26">Biweekly (26)</option>
+              <option value="24">Semi-monthly (24)</option>
+            </select>
           </div>
+        </div>
 
-          <div class="form-row">
-            <div class="col form-group">
-              <label>Other costs (annual $)</label>
-              <input id="otherCosts" type="number" value="4000" />
-            </div>
-            <div class="col form-group">
-              <label>Annual cost increase (%)</label>
-              <input id="costIncrease" type="number" value="0" step="0.1" />
-            </div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+          <div style="flex:1">
+            <label>Start date (month)</label>
+            <select id="startMonth"></select>
           </div>
-
-          <hr style="border:none;border-top:1px solid #eef2f6;margin:10px 0">
-
-          <div style="font-weight:700;margin-bottom:8px">Extra Payments</div>
-
-          <div class="form-row">
-            <div class="col form-group">
-              <label>Extra monthly</label>
-              <input id="extraMonthly" type="number" value="0" />
-            </div>
-            <div class="col form-group">
-              <label>Extra yearly</label>
-              <input id="extraYearly" type="number" value="0" />
-            </div>
-            <div class="col form-group">
-              <label>Extra one-time</label>
-              <input id="extraOne" type="number" value="0" />
-            </div>
+          <div style="width:120px">
+            <label>Start year</label>
+            <input id="startYear" type="number" />
           </div>
+        </div>
 
-          <div class="controls">
-            <button id="calcBtn" class="btn">Calculate</button>
-            <button id="resetBtn" class="btn alt">Reset</button>
-            <button id="csvBtn" class="btn alt">Download CSV</button>
+        <hr style="border:none;border-top:1px solid #eef2f6;margin:10px 0">
+
+        <div style="font-weight:700;margin-bottom:8px">Include Taxes & Costs</div>
+        <div class="form-row">
+          <div class="field">
+            <label>Property tax (% of home / year)</label>
+            <input id="propTaxPct" type="number" value="1.2" step="0.01" />
           </div>
+          <div class="field">
+            <label>Home insurance (annual $)</label>
+            <input id="insurance" type="number" value="1500" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label>PMI (annual $)</label>
+            <input id="pmi" type="number" value="0" />
+          </div>
+          <div class="field">
+            <label>HOA fee (annual $)</label>
+            <input id="hoa" type="number" value="0" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label>Other costs (annual $)</label>
+            <input id="otherCosts" type="number" value="4000" />
+          </div>
+          <div style="width:160px">
+            <label>Annual cost increase (%)</label>
+            <input id="costIncrease" type="number" value="0" step="0.1" />
+          </div>
+        </div>
+
+        <hr style="border:none;border-top:1px solid #eef2f6;margin:10px 0">
+        <div style="font-weight:700;margin-bottom:8px">Extra Payments</div>
+
+        <div class="form-row">
+          <div class="field">
+            <label>Extra monthly pay</label>
+            <input id="extraMonthly" type="number" value="0" />
+          </div>
+          <div class="field">
+            <label>Extra yearly pay</label>
+            <input id="extraYearly" type="number" value="0" />
+          </div>
+          <div style="min-width:160px">
+            <label>Extra one-time pay</label>
+            <input id="extraOne" type="number" value="0" />
+          </div>
+        </div>
+
+        <div class="controls">
+          <button id="calcBtn" class="btn">Calculate</button>
+          <button id="resetBtn" class="btn secondary">Reset</button>
         </div>
       </div>
 
-      <!-- RIGHT: Results & Charts -->
+      <!-- right column: results -->
       <div>
         <div class="card">
           <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
             <div style="flex:1">
-              <div class="small">Monthly Payment</div>
-              <h2 id="monthlyOut" style="margin:6px 0 0;font-size:24px;color:var(--accent)">$0.00</h2>
+              <div class="small muted">Monthly Payment</div>
+              <h2 id="monthly" style="margin:6px 0 0;font-size:24px;color:var(--accent)">$0.00</h2>
             </div>
 
-            <div style="width:260px">
-              <div class="small">Summary</div>
+            <div style="width:240px">
+              <div class="small muted">Summary</div>
               <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px">
-                <div class="small">Total of payments: <strong id="totalOut">$0.00</strong></div>
-                <div class="small">Total interest: <strong id="interestOut">$0.00</strong></div>
-                <div class="small">Payoff date: <strong id="payoffOut">—</strong></div>
+                <div class="small">Total of payments: <strong id="total">$0.00</strong></div>
+                <div class="small">Total interest: <strong id="interest">$0.00</strong></div>
+                <div class="small">Payoff date: <strong id="payoff">—</strong></div>
               </div>
             </div>
           </div>
 
-          <div style="display:grid;grid-template-columns:1fr;gap:12px;margin-top:12px" id="visualWrap">
-            <div class="chartWrap">
-              <div class="chartBox tall" style="height:300px">
-                <canvas id="amortChart"></canvas>
-              </div>
+          <div class="visual">
+            <div style="padding-top:12px">
+              <canvas id="chart" height="240"></canvas>
             </div>
 
             <div>
               <div style="display:flex;align-items:center;justify-content:space-between">
                 <strong>Amortization schedule</strong>
-                <div class="tableToggle">
-                  <button id="btnAnnual" class="tabBtn">Annual</button>
-                  <button id="btnMonthly" class="tabBtn active">Monthly</button>
+                <div class="tabs">
+                  <div id="tabMonthly" class="tab active">Monthly</div>
+                  <div id="tabAnnual" class="tab">Annual</div>
                 </div>
               </div>
 
-              <div class="tableWrap card" id="scheduleWrap" style="margin-top:12px;padding:12px">
-                <div id="annualTable" style="display:none"></div>
-                <div id="monthlyTable"></div>
+              <div style="margin-top:8px" class="card" id="tableCard">
+                <div class="tableWrap" style="overflow:auto; max-height:420px;">
+                  <table id="scheduleTable">
+                    <thead id="thead"></thead>
+                    <tbody id="tbody"></tbody>
+                  </table>
+                </div>
               </div>
+
             </div>
+
           </div>
         </div>
       </div>
-    </div> <!-- grid end -->
-  </div> <!-- wrap end -->
+
+    </div>
+  </div>
 
 <script>
-/* -------------------------
-  Utilities / formatting
-------------------------- */
+/* ------------------ Helper utilities ------------------ */
 const currencyInfo = {
-  USD:{sym:'$',dec:2}, EUR:{sym:'€',dec:2}, GBP:{sym:'£',dec:2},
-  CAD:{sym:'C$',dec:2}, AUD:{sym:'A$',dec:2}, JPY:{sym:'¥',dec:0}, INR:{sym:'₹',dec:2}
+  USD:{sym:'$',pos:'left',dec:2},
+  EUR:{sym:'€',pos:'left',dec:2},
+  GBP:{sym:'£',pos:'left',dec:2},
+  CAD:{sym:'C$',pos:'left',dec:2},
+  AUD:{sym:'A$',pos:'left',dec:2},
+  JPY:{sym:'¥',pos:'left',dec:0},
+  INR:{sym:'₹',pos:'left',dec:2}
 };
 function formatCurrency(v){
-  const cur = document.getElementById('currencyTop').value || 'USD';
+  const cur = document.getElementById('currency').value;
   const info = currencyInfo[cur] || currencyInfo.USD;
   const n = Number(v || 0);
-  return info.sym + n.toLocaleString(undefined,{minimumFractionDigits:info.dec,maximumFractionDigits:info.dec});
+  return info.pos==='left' ? info.sym + n.toLocaleString(undefined,{minimumFractionDigits:info.dec,maximumFractionDigits:info.dec}) : n.toLocaleString(undefined,{minimumFractionDigits:info.dec,maximumFractionDigits:info.dec}) + info.sym;
 }
-function toNumber(v){ const n = parseFloat(v); return isNaN(n) ? 0 : n; }
-
-/* populate startMonth select */
-(function fillMonths(){
-  const sel = document.getElementById('startMonth');
-  sel.innerHTML = '';
-  for(let m=0;m<12;m++){
-    const opt = document.createElement('option');
-    opt.value = m;
-    opt.text = new Date(0,m).toLocaleString(undefined,{month:'short'});
-    sel.appendChild(opt);
-  }
-})();
+function toNumber(v){ const n=parseFloat(v); return isNaN(n)?0:n; }
 
 /* DOM refs */
 const homePriceEl = document.getElementById('homePrice');
@@ -311,139 +310,143 @@ const extraOneEl = document.getElementById('extraOne');
 
 const calcBtn = document.getElementById('calcBtn');
 const resetBtn = document.getElementById('resetBtn');
-const csvBtn = document.getElementById('csvBtn');
 const printBtn = document.getElementById('printBtn');
+const currencyEl = document.getElementById('currency');
 
-const monthlyOut = document.getElementById('monthlyOut');
-const totalOut = document.getElementById('totalOut');
-const interestOut = document.getElementById('interestOut');
-const payoffOut = document.getElementById('payoffOut');
+const monthlyOut = document.getElementById('monthly');
+const totalOut = document.getElementById('total');
+const interestOut = document.getElementById('interest');
+const payoffOut = document.getElementById('payoff');
 
-const amortCtxEl = document.getElementById('amortChart');
-const monthlyTableEl = document.getElementById('monthlyTable');
-const annualTableEl = document.getElementById('annualTable');
-const btnAnnual = document.getElementById('btnAnnual');
-const btnMonthly = document.getElementById('btnMonthly');
+const chartCanvas = document.getElementById('chart');
+const thead = document.getElementById('thead');
+const tbody = document.getElementById('tbody');
 
-let amortChart = null;
-let lastResult = null;
-let activeView = 'monthly';
+const tabMonthly = document.getElementById('tabMonthly');
+const tabAnnual = document.getElementById('tabAnnual');
 
-/* Core schedule computation (periodic) */
-/* This function returns schedule array and summary. */
-function computeSchedule(opts){
-  const {
-    loanAmount, annualRate, termYears, paymentsPerYear,
-    extraMonthly, extraYearly, extraOneTime, startMonth, startYear
-  } = opts;
+let chart = null;
+let lastSchedule = null;
+let activeTab = 'monthly';
 
+/* ------------------ Compute amortization schedule ------------------ */
+function computeSchedule({
+  loanAmount, annualRate, termYears, paymentsPerYear,
+  extraMonthly, extraYearly, extraOneTime, startMonth, startYear
+}){
   const P = loanAmount;
-  const r = annualRate/100/paymentsPerYear;
+  const r = annualRate / 100 / paymentsPerYear;
   const n = Math.max(1, Math.round(termYears * paymentsPerYear));
-  const regularPayment = (r===0) ? (P/n) : (P * (r / (1 - Math.pow(1+r, -n))));
+  const regularPayment = (r===0) ? (P / n) : (P * (r / (1 - Math.pow(1 + r, -n))));
 
   let balance = P;
   let period = 0;
   const schedule = [];
-  let curMonth = startMonth, curYear = startYear;
 
-  // convert extra monthly into per-period equivalent when freq != 12
-  let extraPeriod = 0;
-  if (paymentsPerYear === 12) extraPeriod = Number(extraMonthly) || 0;
-  else if (paymentsPerYear === 26) extraPeriod = (Number(extraMonthly)||0) * 12 / 26;
-  else extraPeriod = (Number(extraMonthly)||0) * 12 / paymentsPerYear;
+  // convert extras to per-period approximation
+  let extraPerPeriod = 0;
+  if (paymentsPerYear === 12) extraPerPeriod = Number(extraMonthly) || 0;
+  else if (paymentsPerYear === 26) extraPerPeriod = (Number(extraMonthly)||0) * 12 / 26;
+  else extraPerPeriod = (Number(extraMonthly)||0) * 12 / paymentsPerYear;
 
-  while (balance > 0.0005 && period < n * 3){
+  const extraOne = Number(extraOneTime) || 0;
+  const extraYear = Number(extraYearly) || 0;
+
+  let curYear = Number(startYear), curMonth = Number(startMonth);
+  const pushDate = () => {
+    const labelMonth = new Date(curYear, curMonth).toLocaleString(undefined,{month:'short'});
+    return {month:curMonth,year:curYear,label:`${labelMonth} ${curYear}`};
+  };
+
+  while (balance > 0.0005 && period < n*3) {
     period++;
     const interest = balance * r;
     let principal = Math.max(0, regularPayment - interest);
     let extraThis = 0;
-
-    // include converted extra monthly
-    extraThis += extraPeriod;
-
-    // apply yearly extra when period hits the original startMonth in calendar
-    if (Number(extraYearly) && curMonth === Number(startMonth)) extraThis += Number(extraYearly);
-
-    // one-time extra at period 1
-    if (period === 1 && Number(extraOneTime)) extraThis += Number(extraOneTime);
-
-    // adjust final payment to avoid small negative balance
+    extraThis += extraPerPeriod;
+    if (extraYear && curMonth === Number(startMonth)) extraThis += extraYear;
+    if (extraOne && period === 1) extraThis += extraOne;
     if (principal + extraThis > balance) extraThis = Math.max(0, balance - principal);
 
-    const payment = principal + interest + extraThis;
+    const actualPayment = principal + interest + extraThis;
     balance = Math.max(0, balance - principal - extraThis);
 
-    const labelMonth = new Date(curYear, curMonth).toLocaleString(undefined,{month:'short'});
     schedule.push({
-      period, payment, interest, principal, extra: extraThis,
-      balance, date: { month: curMonth, year: curYear, label: `${labelMonth} ${curYear}` }
+      period,
+      payment: actualPayment,
+      interest,
+      principal,
+      extra: extraThis,
+      balance,
+      date: pushDate()
     });
 
-    // advance date
-    if (paymentsPerYear === 12){
-      curMonth++; if (curMonth > 11){ curMonth = 0; curYear++; }
-    } else if (paymentsPerYear === 26){
-      // approx: every 2 periods increment month
-      if (period % 2 === 0){ curMonth++; if (curMonth > 11){ curMonth = 0; curYear++; } }
+    // advance date (approximate for biweekly)
+    if (paymentsPerYear === 12) {
+      curMonth++; if (curMonth>11) { curMonth = 0; curYear++; }
+    } else if (paymentsPerYear === 26) {
+      if (period % 2 === 0) { curMonth++; if (curMonth>11) { curMonth = 0; curYear++; } }
     } else {
-      if (period % Math.max(1, Math.round(paymentsPerYear/12)) === 0){
-        curMonth++; if (curMonth > 11){ curMonth = 0; curYear++; }
-      }
+      if (period % Math.max(1, Math.round(paymentsPerYear/12)) === 0) { curMonth++; if (curMonth>11) { curMonth = 0; curYear++; } }
     }
 
-    if (schedule.length > n*3) break; // safety
+    if (schedule.length > n*3) break;
   }
 
-  const totalPayment = schedule.reduce((s,x)=>s+x.payment,0);
-  const totalInterest = schedule.reduce((s,x)=>s+x.interest,0);
+  const totalPayment = schedule.reduce((s,x)=>s + x.payment,0);
+  const totalInterest = schedule.reduce((s,x)=>s + x.interest,0);
 
-  // annual grouping
-  const annualMap = {};
+  const annual = {};
   schedule.forEach(s=>{
     const y = s.date.year;
-    if (!annualMap[y]) annualMap[y] = { year: y, payment:0, interest:0, principal:0, extra:0, endBalance: s.balance };
-    annualMap[y].payment += s.payment;
-    annualMap[y].interest += s.interest;
-    annualMap[y].principal += s.principal;
-    annualMap[y].extra += s.extra;
-    annualMap[y].endBalance = s.balance;
+    if (!annual[y]) annual[y] = { year:y, payment:0, interest:0, principal:0, extra:0, endBalance:s.balance };
+    annual[y].payment += s.payment;
+    annual[y].interest += s.interest;
+    annual[y].principal += s.principal;
+    annual[y].extra += s.extra;
+    annual[y].endBalance = s.balance;
   });
-  const annual = Object.values(annualMap).sort((a,b)=>a.year-b.year);
+  const annualArray = Object.values(annual).sort((a,b)=>a.year-b.year);
 
-  return { schedule, annual, payment: regularPayment, totalPayment, totalInterest, periods: schedule.length };
+  return {
+    schedule, annual: annualArray, payment: regularPayment,
+    totalPayment, totalInterest, periods: schedule.length
+  };
 }
 
-/* Render chart */
+/* ------------------ Rendering ------------------ */
 function renderChart(schedule){
   const labels = schedule.map(s=>s.date.label);
   const balances = schedule.map(s=>s.balance);
   const interests = schedule.map(s=>s.interest);
   const payments = schedule.map(s=>s.payment);
 
-  if (amortChart) amortChart.destroy();
-  amortChart = new Chart(amortCtxEl.getContext('2d'), {
+  if (chart) chart.destroy();
+  chart = new Chart(chartCanvas.getContext('2d'), {
     type:'line',
     data:{
       labels,
       datasets:[
-        {label:'Balance',data:balances,borderColor:'#1f77b4',backgroundColor:'rgba(31,111,182,0.06)',fill:true,tension:0.2},
-        {label:'Interest',data:interests,borderColor:'#7ac142',fill:false,tension:0.2},
-        {label:'Payment',data:payments,borderColor:'#d44',fill:false,tension:0.2}
+        {label:'Balance',data:balances,borderColor:'#0b6ea8',backgroundColor:'rgba(11,110,168,0.06)',fill:true,tension:0.2},
+        {label:'Interest',data:interests,borderColor:'#8cbf3f',backgroundColor:'rgba(140,191,63,0.06)',fill:false,tension:0.2},
+        {label:'Payment',data:payments,borderColor:'#c0392b',backgroundColor:'rgba(192,57,43,0.04)',fill:false,tension:0.2}
       ]
     },
     options:{
-      responsive:true, maintainAspectRatio:false,
       plugins:{legend:{position:'top'}},
-      scales:{ y:{ ticks:{ callback: v => formatCurrency(v) } } }
+      scales:{ y:{ ticks:{ callback: v => formatCurrency(v) } } },
+      maintainAspectRatio:false,
+      responsive:true
     }
   });
+
+  // ensure resize then re-render labels (fix possible clipping)
+  setTimeout(()=>{ try{ chart.resize(); }catch(e){} }, 120);
 }
 
-/* Render tables */
 function renderMonthlyTable(schedule){
-  monthlyTableEl.innerHTML = '<table><thead><tr><th>#</th><th>Date</th><th>Payment</th><th>Interest</th><th>Principal</th><th>Extra</th><th>Ending Balance</th></tr></thead><tbody></tbody></table>';
-  const tbody = monthlyTableEl.querySelector('tbody');
+  thead.innerHTML = `<tr><th>#</th><th>Date</th><th>Payment</th><th>Interest</th><th>Principal</th><th>Extra</th><th>Ending Balance</th></tr>`;
+  tbody.innerHTML = '';
   schedule.forEach(s=>{
     const tr = document.createElement('tr');
     tr.innerHTML = `<td>${s.period}</td>
@@ -456,10 +459,10 @@ function renderMonthlyTable(schedule){
     tbody.appendChild(tr);
   });
 }
+
 function renderAnnualTable(annual){
-  annualTableEl.style.display = 'block';
-  annualTableEl.innerHTML = '<table><thead><tr><th>Year</th><th>Payment</th><th>Interest</th><th>Principal</th><th>Extra</th><th>Ending Balance</th></tr></thead><tbody></tbody></table>';
-  const tbody = annualTableEl.querySelector('tbody');
+  thead.innerHTML = `<tr><th>Year</th><th>Payment</th><th>Interest</th><th>Principal</th><th>Extra</th><th>Ending Balance</th></tr>`;
+  tbody.innerHTML = '';
   annual.forEach(a=>{
     const tr = document.createElement('tr');
     tr.innerHTML = `<td>${a.year}</td>
@@ -472,111 +475,115 @@ function renderAnnualTable(annual){
   });
 }
 
-/* Main calculate and render */
+/* ------------------ Main calculate ------------------ */
 function calculate(){
   const home = toNumber(homePriceEl.value);
   const downPct = toNumber(downPctEl.value);
-  const loan = home * (1 - downPct/100);
+  const loan = home * Math.max(0, (1 - downPct/100));
   const termYears = toNumber(termYearsEl.value);
   const rate = toNumber(rateEl.value);
   const freq = Number(freqEl.value);
   const startMonth = Number(startMonthEl.value || 0);
   const startYear = Number(startYearEl.value || new Date().getFullYear());
 
-  const propTaxPct = toNumber(propTaxEl.value);
-  const insurance = toNumber(insuranceEl.value);
-  const pmi = toNumber(pmiEl.value);
-  const hoa = toNumber(hoaEl.value);
-  const otherCosts = toNumber(otherCostsEl.value);
-  const costIncrease = toNumber(costIncreaseEl.value);
-
   const extraMonthly = toNumber(extraMonthlyEl.value);
   const extraYearly = toNumber(extraYearlyEl.value);
   const extraOne = toNumber(extraOneEl.value);
 
   const res = computeSchedule({
-    loanAmount: loan,
-    annualRate: rate,
-    termYears,
-    paymentsPerYear: freq,
-    extraMonthly, extraYearly, extraOneTime: extraOne,
-    startMonth, startYear
+    loanAmount:loan, annualRate:rate, termYears, paymentsPerYear:freq,
+    extraMonthly, extraYearly, extraOneTime:extraOne, startMonth, startYear
   });
 
-  lastResult = res;
-
+  lastSchedule = res;
   monthlyOut.textContent = formatCurrency(res.payment);
   totalOut.textContent = formatCurrency(res.totalPayment);
   interestOut.textContent = formatCurrency(res.totalInterest);
-  payoffOut.textContent = res.schedule.length ? res.schedule[res.schedule.length-1].date.label : '-';
+  payoffOut.textContent = (res.schedule.length>0) ? res.schedule[res.schedule.length-1].date.label : '-';
 
   renderChart(res.schedule);
+  if (activeTab === 'monthly') renderMonthlyTable(res.schedule); else renderAnnualTable(res.annual);
 
-  if (activeView === 'monthly') {
-    annualTableEl.style.display = 'none';
-    renderMonthlyTable(res.schedule);
-  } else {
-    renderAnnualTable(res.annual);
-    monthlyTableEl.innerHTML = '';
-  }
+  // ensure charts resize after render (extra safety for Elementor)
+  setTimeout(safeResizeCharts, 180);
 }
 
-/* CSV download */
-function downloadCSV(){
-  if (!lastResult) return alert('Calculate first');
-  const rows = [['Period','Date','Payment','Principal','Interest','Extra','EndingBalance']];
-  lastResult.schedule.forEach(r => rows.push([
-    r.period, r.date.label, r.payment.toFixed(2), r.principal.toFixed(2), r.interest.toFixed(2), r.extra.toFixed(2), r.balance.toFixed(2)
-  ]));
-  const csv = rows.map(r => r.join(',')).join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = 'amortization.csv';
-  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-}
-
-/* UI wiring */
-calcBtn.addEventListener('click', calculate);
+/* ------------------ UI wiring ------------------ */
+calcBtn.addEventListener('click', ()=> calculate());
 resetBtn.addEventListener('click', ()=>{
-  homePriceEl.value = 400000; downPctEl.value = 20; termYearsEl.value = 30; rateEl.value = 6.228;
-  freqEl.value = 12; startMonthEl.value = new Date().getMonth(); startYearEl.value = new Date().getFullYear();
-  propTaxEl.value = 1.2; insuranceEl.value = 1500; pmiEl.value = 0; hoaEl.value = 0; otherCostsEl.value = 4000; costIncreaseEl.value = 0;
-  extraMonthlyEl.value = 0; extraYearlyEl.value = 0; extraOneEl.value = 0;
-  monthlyOut.textContent = formatCurrency(0); totalOut.textContent = formatCurrency(0); interestOut.textContent = formatCurrency(0); payoffOut.textContent = '-';
-  monthlyTableEl.innerHTML = ''; annualTableEl.innerHTML = ''; if (amortChart) amortChart.destroy(); lastResult = null;
-});
-csvBtn.addEventListener('click', downloadCSV);
-printBtn.addEventListener('click', ()=>window.print());
-
-btnMonthly.addEventListener('click', ()=>{
-  activeView = 'monthly';
-  btnMonthly.classList.add('active'); btnAnnual.classList.remove('active');
-  if (lastResult) renderMonthlyTable(lastResult.schedule);
-});
-btnAnnual.addEventListener('click', ()=>{
-  activeView = 'annual';
-  btnAnnual.classList.add('active'); btnMonthly.classList.remove('active');
-  if (lastResult) renderAnnualTable(lastResult.annual);
-});
-
-/* currency change: re-render numeric displays using new symbol */
-document.getElementById('currencyTop').addEventListener('change', ()=>{
-  if (!lastResult) return;
-  monthlyOut.textContent = formatCurrency(lastResult.payment);
-  totalOut.textContent = formatCurrency(lastResult.totalPayment);
-  interestOut.textContent = formatCurrency(lastResult.totalInterest);
-  if (activeView === 'monthly') renderMonthlyTable(lastResult.schedule);
-  else renderAnnualTable(lastResult.annual);
-  if (amortChart && lastResult) renderChart(lastResult.schedule);
-});
-
-/* initial setup */
-document.addEventListener('DOMContentLoaded', ()=>{
-  startYearEl.value = new Date().getFullYear();
+  homePriceEl.value = 400000;
+  downPctEl.value = 20;
+  termYearsEl.value = 30;
+  rateEl.value = 6.228;
+  freqEl.value = 12;
   startMonthEl.value = new Date().getMonth();
+  startYearEl.value = new Date().getFullYear();
+  propTaxEl.value = 1.2;
+  insuranceEl.value = 1500;
+  pmiEl.value = 0;
+  hoaEl.value = 0;
+  otherCostsEl.value = 4000;
+  costIncreaseEl.value = 0;
+  extraMonthlyEl.value = 0;
+  extraYearlyEl.value = 0;
+  extraOneEl.value = 0;
+  monthlyOut.textContent = formatCurrency(0);
+  totalOut.textContent = formatCurrency(0);
+  interestOut.textContent = formatCurrency(0);
+  payoffOut.textContent = '-';
+  tbody.innerHTML = '';
+  if (chart) chart.destroy(); chart = null;
+});
+tabMonthly.addEventListener('click', ()=>{
+  activeTab='monthly';
+  tabMonthly.classList.add('active'); tabAnnual.classList.remove('active');
+  if (lastSchedule) renderMonthlyTable(lastSchedule.schedule);
+});
+tabAnnual.addEventListener('click', ()=>{
+  activeTab='annual';
+  tabAnnual.classList.add('active'); tabMonthly.classList.remove('active');
+  if (lastSchedule) renderAnnualTable(lastSchedule.annual);
+});
+
+printBtn.addEventListener('click', ()=> window.print());
+
+currencyEl.addEventListener('change', ()=>{
+  if (!lastSchedule) return;
+  monthlyOut.textContent = formatCurrency(lastSchedule.payment);
+  totalOut.textContent = formatCurrency(lastSchedule.totalPayment);
+  interestOut.textContent = formatCurrency(lastSchedule.totalInterest);
+  if (activeTab==='monthly') renderMonthlyTable(lastSchedule.schedule);
+  else renderAnnualTable(lastSchedule.annual);
+  if (chart) { renderChart(lastSchedule.schedule); }
+});
+
+/* ------------------ Resize helpers (fix clipped axis & Elementor rendering) ------------------ */
+function safeResizeCharts(){
+  try {
+    if (chart && typeof chart.resize === 'function') chart.resize();
+    // Chart.js stores instances in Chart.instances (v4+) or Chart.helpers; attempt safe approach:
+    if (window.Chart && window.Chart.instances) {
+      Object.values(window.Chart.instances).forEach(c => { try { c.resize(); } catch(e){} });
+    }
+  } catch(e){}
+  // reset horizontal scroll on container to remove thin left gutter artifacts
+  const cont = document.querySelector('.container');
+  if (cont) cont.scrollLeft = 0;
+}
+window.addEventListener('load', ()=>{ setTimeout(safeResizeCharts, 120); setTimeout(safeResizeCharts, 600); });
+window.addEventListener('resize', ()=>{ clearTimeout(window._resizeTimer); window._resizeTimer = setTimeout(safeResizeCharts, 120); });
+window.addEventListener('orientationchange', ()=> setTimeout(safeResizeCharts, 200));
+
+/* ------------------ Init: populate months and run first calc ------------------ */
+document.addEventListener('DOMContentLoaded', ()=>{
+  // fill startMonth options without document.write (works in WP/Elementor)
+  const months = [...Array(12).keys()].map(m => new Date(0,m).toLocaleString(undefined,{month:'short'}));
+  startMonthEl.innerHTML = months.map((label, idx)=>`<option value="${idx}">${label}</option>`).join('');
+  startMonthEl.value = new Date().getMonth();
+  startYearEl.value = new Date().getFullYear();
+
+  // initial calculation
   calculate();
-  // ensure charts resize correctly in responsive layouts
-  window.addEventListener('resize', ()=>{ if (amortChart) amortChart.resize(); });
 });
 </script>
 </body>
