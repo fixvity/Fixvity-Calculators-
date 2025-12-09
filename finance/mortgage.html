@@ -3,104 +3,102 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Mortgage Calculator — Mobile-first (updated)</title>
+<title>Mortgage Calculator — Mobile-first (updated fixes)</title>
+
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
-  :root{
-    --accent:#1f6fb6;
-    --bg:#f7fbfd;
-    --card:#ffffff;
-    --muted:#6b7280;
-    --radius:12px;
-    --shadow: 0 8px 28px rgba(10,20,30,0.06);
-    --container-max:1100px;
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;color:#111;background:var(--bg);-webkit-font-smoothing:antialiased}
-  a{color:var(--accent);text-decoration:none}
-  .wrap{max-width:var(--container-max);margin:18px auto;padding:14px}
-  header h1{margin:0;font-size:28px;color:var(--accent)}
-  header p.lead{margin:8px 0 12px;color:var(--muted);font-size:14px}
+:root{
+  --accent:#1f6fb6; --bg:#f7fbfd; --card:#ffffff; --muted:#6b7280;
+  --radius:12px; --shadow: 0 8px 28px rgba(10,20,30,0.06); --container-max:1100px;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;color:#111;background:var(--bg);-webkit-font-smoothing:antialiased}
+.wrap{max-width:var(--container-max);margin:18px auto;padding:14px}
+header h1{margin:0;font-size:28px;color:var(--accent)}
+header p.lead{margin:8px 0 12px;color:var(--muted);font-size:14px}
 
-  .card{background:var(--card);border-radius:12px;box-shadow:var(--shadow);padding:14px;margin-bottom:14px;overflow:visible}
-  input, select, textarea{width:100%;padding:12px;border:1px solid #e8eef3;border-radius:10px;font-size:16px;background:#fff}
-  label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
-  .small{font-size:13px;color:var(--muted)}
-  .form-row{display:flex;gap:8px;flex-wrap:wrap}
-  .col{flex:1;min-width:0}
+.card{background:var(--card);border-radius:12px;box-shadow:var(--shadow);padding:14px;margin-bottom:14px;overflow:visible}
+input, select, textarea{width:100%;padding:12px;border:1px solid #e8eef3;border-radius:10px;font-size:16px;background:#fff}
+label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+.small{font-size:13px;color:var(--muted)}
+.form-row{display:flex;gap:8px;flex-wrap:wrap}
+.col{flex:1;min-width:0}
 
-  .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
-  .btn{display:inline-block;padding:10px 14px;border-radius:8px;border:0;background:var(--accent);color:#fff;font-weight:600;cursor:pointer}
-  .btn.alt{background:#eef6fb;color:var(--accent);border:1px solid #dfeffb}
-  .btn.ghost{background:#fff;border:1px solid #e6eef8;color:var(--muted);padding:10px 12px}
+.controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.btn{display:inline-block;padding:10px 14px;border-radius:8px;border:0;background:var(--accent);color:#fff;font-weight:600;cursor:pointer}
+.btn.alt{background:#eef6fb;color:var(--accent);border:1px solid #dfeffb}
+.btn.ghost{background:#fff;border:1px solid #e6eef8;color:var(--muted);padding:10px 12px}
 
-  /* Chart */
-  .chartWrap{background:var(--card);padding:12px;border-radius:10px;box-shadow:var(--shadow);overflow:hidden}
-  .chartBox{height:230px; position:relative;}
-  canvas{width:100% !important;height:100% !important;display:block}
+/* Chart */
+.chartWrap{background:var(--card);padding:12px;border-radius:10px;box-shadow:var(--shadow);overflow:hidden}
+.chartBox{height:230px; position:relative;}
+canvas{width:100% !important;height:100% !important;display:block}
 
-  /* schedule - card list for small screens */
-  .scheduleHeading{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-  .tableToggle{display:flex;gap:8px}
-  .tabBtn{padding:8px 12px;border-radius:8px;border:1px solid #e6eef8;background:#f8fbff;cursor:pointer;font-size:14px}
-  .tabBtn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+/* schedule - card list for small screens */
+.scheduleHeading{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.tableToggle{display:flex;gap:8px}
+.tabBtn{padding:8px 12px;border-radius:8px;border:1px solid #e6eef8;background:#f8fbff;cursor:pointer;font-size:14px}
+.tabBtn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 
-  .tableWrap{margin-top:8px;background:transparent}
-  .tableInner{overflow:auto;-webkit-overflow-scrolling:touch}
-  table{width:100%;border-collapse:collapse;min-width:720px}
-  th,td{padding:10px;border-bottom:1px solid #eef2f7;text-align:left;font-size:14px}
-  th{background:#2f6b9f;color:#fff;position:sticky;top:0;z-index:2}
+.tableWrap{margin-top:8px;background:transparent}
+.tableInner{overflow:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;min-width:720px}
+th,td{padding:10px;border-bottom:1px solid #eef2f7;text-align:left;font-size:14px}
+th{background:#2f6b9f;color:#fff;position:sticky;top:0;z-index:2}
+.cardList{display:block}
+.periodCard{background:#fff;border-radius:10px;padding:10px;margin-bottom:8px;border:1px solid #eef4f8}
+.periodRow{display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:14px}
+.periodLabel{font-weight:600}
+.periodSmall{color:var(--muted);font-size:13px}
+
+@media (max-width:640px){
+  header h1{font-size:24px}
+  .chartBox{height:200px}
+  table{display:none}
+  .tableInner{max-height:none}
   .cardList{display:block}
-  .periodCard{background:#fff;border-radius:10px;padding:10px;margin-bottom:8px;border:1px solid #eef4f8}
-  .periodRow{display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:14px}
-  .periodLabel{font-weight:600}
-  .periodSmall{color:var(--muted);font-size:13px}
+  .tableToggle{gap:6px}
+  .controls{justify-content:flex-start}
+}
 
-  @media (max-width:640px){
-    header h1{font-size:24px}
-    .chartBox{height:200px}
-    table{display:none}
-    .tableInner{max-height:none}
-    .cardList{display:block}
-    .tableToggle{gap:6px}
-    .controls{justify-content:flex-start}
-  }
+@media (min-width:641px){
+  .cardList{display:none}
+  table{display:table}
+  .chartBox{height:300px}
+}
 
-  @media (min-width:641px){
-    .cardList{display:none}
-    table{display:table}
-    .chartBox{height:300px}
-  }
+.grid{display:block}
+@media (min-width:900px){
+  .grid{display:grid;grid-template-columns:1fr 420px;gap:18px;align-items:start}
+}
 
-  .grid{display:block}
-  @media (min-width:900px){
-    .grid{display:grid;grid-template-columns:1fr 420px;gap:18px;align-items:start}
-  }
+@media print{
+  .controls, label, .small, .tabBtn, .tableToggle { display:none !important; }
+  body{background:#fff}
+  .wrap{max-width:100%;padding:0}
+}
 
-  @media print{
-    .controls, label, .small, .tabBtn, .tableToggle { display:none !important; }
-    body{background:#fff}
-    .wrap{max-width:100%;padding:0}
-  }
-
-  .summary{font-size:14px;color:var(--muted)}
-  .summary strong{color:#111}
-  .legendRow{display:flex;gap:12px;align-items:center;margin-bottom:6px}
-  .legendItem{display:flex;gap:6px;align-items:center}
-  .legendBox{width:14px;height:10px;border-radius:2px}
+.summary{font-size:14px;color:var(--muted)}
+.summary strong{color:#111}
+.legendRow{display:flex;gap:12px;align-items:center;margin-bottom:6px}
+.legendItem{display:flex;gap:6px;align-items:center}
+.legendBox{width:14px;height:10px;border-radius:2px}
 </style>
 </head>
 <body>
   <div class="wrap">
     <header>
       <h1>Mortgage Calculator</h1>
-      <p class="lead">Monthly payment, amortization (monthly & annual), charts & printable results — mobile-first.</p>
+      <p class="lead">Monthly payment, amortization (monthly & annual), charts & printable results </p>
     </header>
 
     <!-- currency (top) -->
     <div class="card" style="margin-bottom:12px;">
       <div class="small">Currency & Format</div>
-      <select id="currencyTop" style="max-width:260px;margin-top:8px;">
+      <select id="currencyTop" style="max-width:320px;margin-top:8px;">
+        <!-- expanded currency list -->
         <option value="USD">USD - $</option>
         <option value="EUR">EUR - €</option>
         <option value="GBP">GBP - £</option>
@@ -108,6 +106,11 @@
         <option value="AUD">AUD - A$</option>
         <option value="JPY">JPY - ¥</option>
         <option value="INR">INR - ₹</option>
+        <option value="CNY">CNY - ¥</option>
+        <option value="CHF">CHF - CHF</option>
+        <option value="SEK">SEK - kr</option>
+        <option value="NZD">NZD - $</option>
+        <option value="SGD">SGD - $</option>
       </select>
     </div>
 
@@ -135,7 +138,7 @@
               <label for="rate">Interest rate (%)</label>
               <input id="rate" type="number" value="6.228" step="0.001" />
             </div>
-            <!-- payment per year removed (monthly fixed) -->
+            <!-- payment-per-year removed -->
           </div>
 
           <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
@@ -207,7 +210,7 @@
             <button id="calcBtn" class="btn">Calculate</button>
             <button id="resetBtn" class="btn alt">Reset</button>
             <button id="csvBtn" class="btn alt">Download CSV</button>
-            <!-- Print button style changed to alt (same as reset) -->
+            <!-- Print button style changed to alt -->
             <button id="printBtn" class="btn alt">Print</button>
           </div>
           <div class="small" style="margin-top:10px">Tip: fees/tax are included in the loan calculation by default.</div>
@@ -261,6 +264,7 @@
               <div class="tableInner" id="monthlyTable"></div>
               <div class="tableInner" id="annualTable" style="display:none"></div>
               <div id="monthlyCards" class="cardList" aria-live="polite" style="margin-top:8px"></div>
+              <div id="annualCards" class="cardList" aria-live="polite" style="margin-top:8px;display:none"></div>
             </div>
           </div>
         </div>
@@ -269,12 +273,30 @@
   </div> <!-- wrap end -->
 
 <script>
-/* -------------------------
-   Utilities and DOM setup
-------------------------- */
-const currencyInfo = { USD:{sym:'$',dec:2}, EUR:{sym:'€',dec:2}, GBP:{sym:'£',dec:2}, CAD:{sym:'C$',dec:2}, AUD:{sym:'A$',dec:2}, JPY:{sym:'¥',dec:0}, INR:{sym:'₹',dec:2} };
-function formatCurrency(v){ const cur = document.getElementById('currencyTop').value || 'USD'; const info = currencyInfo[cur] || currencyInfo.USD; const n = Number(v||0); return info.sym + n.toLocaleString(undefined,{minimumFractionDigits:info.dec,maximumFractionDigits:info.dec}); }
-function formatCurrencyShort(v){ const n = Math.abs(Number(v||0)); if (n>=1e6) return (n/1e6).toFixed(1)+'M'; if (n>=1000) return (n/1000).toFixed(0)+'k'; return formatCurrency(v); }
+/* Utilities and DOM setup */
+const currencyInfo = {
+  USD:{sym:'$',dec:2}, EUR:{sym:'€',dec:2}, GBP:{sym:'£',dec:2}, CAD:{sym:'C$',dec:2},
+  AUD:{sym:'A$',dec:2}, JPY:{sym:'¥',dec:0}, INR:{sym:'₹',dec:2}, CNY:{sym:'¥',dec:2},
+  CHF:{sym:'CHF',dec:2}, SEK:{sym:'kr',dec:2}, NZD:{sym:'$NZ',dec:2}, SGD:{sym:'$',dec:2}
+};
+function formatCurrency(v){
+  const cur = document.getElementById('currencyTop').value || 'USD';
+  const info = currencyInfo[cur] || currencyInfo.USD;
+  const n = Number(v||0);
+  // use Intl if possible for better grouping, but keep symbol prefix for consistency
+  try {
+    const formatted = n.toLocaleString(undefined,{minimumFractionDigits:info.dec,maximumFractionDigits:info.dec});
+    return info.sym + formatted;
+  } catch(e){
+    return info.sym + Number(n).toFixed(info.dec);
+  }
+}
+function formatCurrencyShort(v){
+  const n = Math.abs(Number(v||0));
+  if (n >= 1e6) return (n/1e6).toFixed(1)+'M';
+  if (n >= 1000) return (n/1000).toFixed(0)+'k';
+  return formatCurrency(v);
+}
 function toNumber(v){ const n=parseFloat(v); return isNaN(n)?0:n; }
 
 /* DOM refs */
@@ -305,11 +327,13 @@ const monthlyOut = document.getElementById('monthlyOut');
 const totalOut = document.getElementById('totalOut');
 const interestOut = document.getElementById('interestOut');
 const payoffOut = document.getElementById('payoffOut');
-const amortChartCanvas = document.getElementById('amortChart');
 
+const amortChartCanvas = document.getElementById('amortChart');
 const monthlyTableEl = document.getElementById('monthlyTable');
 const annualTableEl = document.getElementById('annualTable');
 const monthlyCardsEl = document.getElementById('monthlyCards');
+const annualCardsEl = document.getElementById('annualCards');
+
 const btnMonthly = document.getElementById('btnMonthly');
 const btnAnnual = document.getElementById('btnAnnual');
 
@@ -317,13 +341,13 @@ let chartInstance = null;
 let lastResult = null;
 let activeView = 'monthly';
 
-/* populate month select */
-(function fillMonths(){ const sel=startMonthEl; sel.innerHTML=''; for(let m=0;m<12;m++){const o=document.createElement('option');o.value=m;o.text=new Date(0,m).toLocaleString(undefined,{month:'short'});sel.appendChild(o);} })();
+/* populate months */
+(function fillMonths(){ const sel = startMonthEl; sel.innerHTML=''; for(let m=0;m<12;m++){ const o=document.createElement('option'); o.value=m; o.text = new Date(0,m).toLocaleString(undefined,{month:'short'}); sel.appendChild(o);} })();
 
-/* compute schedule — monthly only */
+/* compute schedule (monthly fixed) */
 function computeSchedule(opts){
   const { loanAmount, annualRate, termYears, extraMonthly, extraYearly, extraOneTime, startMonth, startYear } = opts;
-  const paymentsPerYear = 12; // fixed monthly
+  const paymentsPerYear = 12;
   const P = loanAmount;
   const r = annualRate/100/paymentsPerYear;
   const n = Math.max(1, Math.round(termYears * paymentsPerYear));
@@ -332,10 +356,9 @@ function computeSchedule(opts){
   let period = 0;
   let curMonth = startMonth, curYear = startYear;
   const schedule = [];
+  const extraPerPeriod = Number(extraMonthly) || 0;
+  const safety = n + 240; // safety cap: very large but prevents infinite loop
 
-  const extraPerPeriod = (Number(extraMonthly) || 0);
-
-  const safety = n + 24;
   while (balance > 0.0005 && period < safety){
     period++;
     const interest = balance * r;
@@ -350,19 +373,25 @@ function computeSchedule(opts){
     const payment = principal + interest + extraThis;
     balance = Math.max(0, balance - principal - extraThis);
 
-    const labelMonth = new Date(curYear, curMonth).toLocaleString(undefined,{month:'short'});
-    schedule.push({ period, dateLabel: `${labelMonth} ${curYear}`, payment, interest, principal, extra: extraThis, balance });
+    const dateObj = new Date(curYear, curMonth, 1);
+    const labelMonth = dateObj.toLocaleString(undefined,{month:'short'});
+    schedule.push({
+      period,
+      dateObj,              // real date object (used for reliable year)
+      dateLabel: `${labelMonth} ${curYear}`,
+      payment, interest, principal, extra: extraThis, balance
+    });
 
-    curMonth++; if (curMonth>11){curMonth=0;curYear++;}
+    curMonth++; if (curMonth > 11){ curMonth = 0; curYear++; }
   }
 
   const totalPayment = schedule.reduce((s,x)=>s+x.payment,0);
   const totalInterest = schedule.reduce((s,x)=>s+x.interest,0);
 
-  // annual grouping
+  // group annual by numeric year from dateObj
   const annualMap = {};
   schedule.forEach(s=>{
-    const y = s.dateLabel.split(' ').pop();
+    const y = s.dateObj.getFullYear();
     if (!annualMap[y]) annualMap[y] = { year: y, payment:0, interest:0, principal:0, extra:0, endBalance: s.balance };
     annualMap[y].payment += s.payment;
     annualMap[y].interest += s.interest;
@@ -375,12 +404,12 @@ function computeSchedule(opts){
   return { schedule, annual, payment: regularPayment, totalPayment, totalInterest, periods: schedule.length };
 }
 
-/* chart: show year ticks more clearly on x-axis */
+/* Chart render that adapts axis ticks for mobile and shows years clearly */
 function renderChart(schedule){
-  const labels = schedule.map(s => s.dateLabel);
-  const balances = schedule.map(s => s.balance);
-  const interests = schedule.map(s => s.interest);
-  const payments = schedule.map(s => s.payment);
+  const labels = schedule.map(s=>s.dateLabel);
+  const balances = schedule.map(s=>s.balance);
+  const interests = schedule.map(s=>s.interest);
+  const payments = schedule.map(s=>s.payment);
 
   if (chartInstance) chartInstance.destroy();
   const ctx = amortChartCanvas.getContext('2d');
@@ -404,24 +433,23 @@ function renderChart(schedule){
       },
       scales:{
         y:{ ticks:{ callback: (v)=> (window.innerWidth<=640? formatCurrencyShort(v) : formatCurrency(v)), maxTicksLimit:6 }, grid:{ color:'#eef6fb' } },
-        x:{ 
-          ticks:{ 
-            autoSkip:true, 
+        x:{
+          ticks:{
+            autoSkip:true,
             maxRotation:0,
             callback: function(value, index, ticks){
-              // show month-year labels selectively: on small screens show year when month is Jan,
-              // otherwise show month + short year on larger screens
               const label = this.getLabelForValue(value) || '';
+              const small = window.innerWidth <= 640;
+              if (!label) return '';
               const parts = label.split(' ');
               if (parts.length < 2) return label;
               const month = parts[0], year = parts[1];
-              const small = window.innerWidth <= 640;
               if (small){
-                // show only year when January (every Jan) or every 24 months if very sparse
-                const showYear = month === 'Jan' || index % 24 === 0;
-                return showYear ? year : '';
+                // small screens: show only a few year ticks (every Jan or every 24 months)
+                if (month === 'Jan' || index % 24 === 0) return year;
+                return '';
               } else {
-                // show every ~12 ticks as month year
+                // larger: show month + year every ~12 ticks
                 const show = index % Math.ceil(Math.max(1, labels.length / 8)) === 0;
                 return show ? label : '';
               }
@@ -437,7 +465,7 @@ function renderChart(schedule){
   });
 }
 
-/* Render monthly table + cards */
+/* Render tables and card lists */
 function renderMonthlyTable(schedule){
   monthlyTableEl.innerHTML = '';
   if (!schedule || schedule.length===0) return;
@@ -455,7 +483,6 @@ function renderMonthlyTable(schedule){
   monthlyTableEl.appendChild(tbl);
 }
 
-/* Render annual table properly */
 function renderAnnualTable(annual){
   annualTableEl.innerHTML = '';
   if (!annual || annual.length===0) return;
@@ -473,7 +500,7 @@ function renderAnnualTable(annual){
   annualTableEl.appendChild(tbl);
 }
 
-/* Mobile stacked cards */
+/* Mobile card views for monthly and annual */
 function renderMonthlyCards(schedule){
   monthlyCardsEl.innerHTML = '';
   if (!schedule || schedule.length===0) return;
@@ -503,7 +530,18 @@ function renderMonthlyCards(schedule){
   }
 }
 
-/* Main calculate & render */
+function renderAnnualCards(annual){
+  annualCardsEl.innerHTML = '';
+  if (!annual || annual.length===0) return;
+  annual.forEach(a=>{
+    const div = document.createElement('div');
+    div.className = 'periodCard';
+    div.innerHTML = `<div class="periodRow"><div><div class="periodLabel">${a.year}</div><div class="periodSmall">Payment: ${formatCurrency(a.payment)}</div></div><div style="text-align:right"><div style="font-weight:700">${formatCurrency(a.endBalance)}</div><div class="periodSmall">Interest: ${formatCurrency(a.interest)}</div></div></div>`;
+    annualCardsEl.appendChild(div);
+  });
+}
+
+/* Main calculate & render (call this on currency change too) */
 function calculate(){
   const home = toNumber(homePriceEl.value);
   const downPct = toNumber(downPctEl.value);
@@ -524,19 +562,18 @@ function calculate(){
     extraMonthly, extraYearly, extraOneTime: extraOne,
     startMonth, startYear
   });
-
   lastResult = res;
 
-  // monthly display uses payment + extra monthly
   monthlyOut.textContent = formatCurrency((res.payment||0) + (Number(extraMonthly)||0));
   totalOut.textContent = formatCurrency(res.totalPayment);
   interestOut.textContent = formatCurrency(res.totalInterest);
-  payoffOut.textContent = res.schedule.length? res.schedule[res.schedule.length-1].dateLabel : '-';
+  payoffOut.textContent = res.schedule.length ? res.schedule[res.schedule.length-1].dateLabel : '-';
 
   renderChart(res.schedule);
   renderMonthlyTable(res.schedule);
   renderAnnualTable(res.annual);
   renderMonthlyCards(res.schedule);
+  renderAnnualCards(res.annual);
 }
 
 /* CSV export */
@@ -559,7 +596,7 @@ resetBtn.addEventListener('click', ()=>{
   propTaxEl.value = 1.2; insuranceEl.value = 1500; pmiEl.value = 0; hoaEl.value = 0; otherCostsEl.value = 4000; costIncreaseEl.value=0;
   extraMonthlyEl.value = 0; extraYearlyEl.value = 0; extraOneEl.value = 0;
   monthlyOut.textContent = '$0.00'; totalOut.textContent = '$0.00'; interestOut.textContent = '$0.00'; payoffOut.textContent = '—';
-  monthlyTableEl.innerHTML = ''; annualTableEl.innerHTML = ''; monthlyCardsEl.innerHTML = '';
+  monthlyTableEl.innerHTML = ''; annualTableEl.innerHTML = ''; monthlyCardsEl.innerHTML = ''; annualCardsEl.innerHTML = '';
   if (chartInstance) chartInstance.destroy(); lastResult = null;
 });
 csvBtn.addEventListener('click', downloadCSV);
@@ -569,20 +606,19 @@ btnMonthly.addEventListener('click', ()=>{
   activeView='monthly';
   btnMonthly.classList.add('active'); btnAnnual.classList.remove('active');
   monthlyTableEl.style.display = ''; annualTableEl.style.display = 'none';
-  // keep mobile cards visible when monthly
-  monthlyCardsEl.style.display = '';
+  monthlyCardsEl.style.display = ''; annualCardsEl.style.display = 'none';
 });
 btnAnnual.addEventListener('click', ()=>{
   activeView='annual';
   btnAnnual.classList.add('active'); btnMonthly.classList.remove('active');
   monthlyTableEl.style.display = 'none'; annualTableEl.style.display = '';
-  // hide mobile monthly cards when annual active
-  monthlyCardsEl.style.display = 'none';
+  monthlyCardsEl.style.display = 'none'; annualCardsEl.style.display = '';
 });
 
-/* currency change re-render */
+/* currency change: re-calc (this ensures chart and labels update properly) */
 document.getElementById('currencyTop').addEventListener('change', ()=>{
-  if (!lastResult) return calculate();
+  // recalc everything with new currency formatting
+  calculate();
 });
 
 /* initial */
