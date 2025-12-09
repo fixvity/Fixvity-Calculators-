@@ -3,10 +3,9 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Mortgage Calculator — Mobile-first</title>
+<title>Mortgage Calculator — Mobile-first (updated)</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-  /* Mobile-first variables & base */
   :root{
     --accent:#1f6fb6;
     --bg:#f7fbfd;
@@ -51,14 +50,12 @@
   table{width:100%;border-collapse:collapse;min-width:720px}
   th,td{padding:10px;border-bottom:1px solid #eef2f7;text-align:left;font-size:14px}
   th{background:#2f6b9f;color:#fff;position:sticky;top:0;z-index:2}
-  /* compact card list for mobile */
   .cardList{display:block}
   .periodCard{background:#fff;border-radius:10px;padding:10px;margin-bottom:8px;border:1px solid #eef4f8}
   .periodRow{display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:14px}
   .periodLabel{font-weight:600}
   .periodSmall{color:var(--muted);font-size:13px}
 
-  /* small screen behaviour: hide wide table and show cards */
   @media (max-width:640px){
     header h1{font-size:24px}
     .chartBox{height:200px}
@@ -69,20 +66,17 @@
     .controls{justify-content:flex-start}
   }
 
-  /* larger screens: show table, hide card list */
   @media (min-width:641px){
     .cardList{display:none}
     table{display:table}
     .chartBox{height:300px}
   }
 
-  /* grid for bigger screens: inputs left results right */
   .grid{display:block}
   @media (min-width:900px){
     .grid{display:grid;grid-template-columns:1fr 420px;gap:18px;align-items:start}
   }
 
-  /* print adjustments */
   @media print{
     .controls, label, .small, .tabBtn, .tableToggle { display:none !important; }
     body{background:#fff}
@@ -118,7 +112,7 @@
     </div>
 
     <div class="grid">
-      <!-- LEFT: inputs (mobile first) -->
+      <!-- LEFT: inputs -->
       <div>
         <div class="card">
           <div style="display:flex;gap:10px;margin-bottom:10px;align-items:flex-start">
@@ -141,14 +135,7 @@
               <label for="rate">Interest rate (%)</label>
               <input id="rate" type="number" value="6.228" step="0.001" />
             </div>
-            <div style="width:140px">
-              <label for="freq">Payments/yr</label>
-              <select id="freq">
-                <option value="12">Monthly (12)</option>
-                <option value="26">Biweekly (26)</option>
-                <option value="24">Semi-monthly (24)</option>
-              </select>
-            </div>
+            <!-- payment per year removed (monthly fixed) -->
           </div>
 
           <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
@@ -220,7 +207,8 @@
             <button id="calcBtn" class="btn">Calculate</button>
             <button id="resetBtn" class="btn alt">Reset</button>
             <button id="csvBtn" class="btn alt">Download CSV</button>
-            <button id="printBtn" class="btn ghost">Print</button>
+            <!-- Print button style changed to alt (same as reset) -->
+            <button id="printBtn" class="btn alt">Print</button>
           </div>
           <div class="small" style="margin-top:10px">Tip: fees/tax are included in the loan calculation by default.</div>
         </div>
@@ -247,7 +235,7 @@
           <div style="margin-top:12px">
             <div class="chartWrap">
               <div class="legendRow" style="margin-bottom:6px;align-items:center;justify-content:space-between">
-                <div class="legendItem" style="display:flex;gap:10px;align-items:center">
+                <div style="display:flex;gap:10px;align-items:center">
                   <div class="legendBox" style="background:#1f77b4;"></div><div class="periodSmall">Balance</div>
                   <div class="legendBox" style="background:#7ac142;margin-left:10px;"></div><div class="periodSmall">Interest</div>
                   <div class="legendBox" style="background:#d44;margin-left:10px;"></div><div class="periodSmall">Payment</div>
@@ -270,11 +258,8 @@
             </div>
 
             <div class="tableWrap">
-              <!-- desktop table -->
               <div class="tableInner" id="monthlyTable"></div>
               <div class="tableInner" id="annualTable" style="display:none"></div>
-
-              <!-- mobile stacked cards -->
               <div id="monthlyCards" class="cardList" aria-live="polite" style="margin-top:8px"></div>
             </div>
           </div>
@@ -289,7 +274,7 @@
 ------------------------- */
 const currencyInfo = { USD:{sym:'$',dec:2}, EUR:{sym:'€',dec:2}, GBP:{sym:'£',dec:2}, CAD:{sym:'C$',dec:2}, AUD:{sym:'A$',dec:2}, JPY:{sym:'¥',dec:0}, INR:{sym:'₹',dec:2} };
 function formatCurrency(v){ const cur = document.getElementById('currencyTop').value || 'USD'; const info = currencyInfo[cur] || currencyInfo.USD; const n = Number(v||0); return info.sym + n.toLocaleString(undefined,{minimumFractionDigits:info.dec,maximumFractionDigits:info.dec}); }
-function formatCurrencyShort(v){ const n = Math.abs(Number(v||0)); if (n>=1e6) return '$'+(v/1e6).toFixed(1)+'M'; if (n>=1000) return '$'+(v/1000).toFixed(0)+'k'; return formatCurrency(v); }
+function formatCurrencyShort(v){ const n = Math.abs(Number(v||0)); if (n>=1e6) return (n/1e6).toFixed(1)+'M'; if (n>=1000) return (n/1000).toFixed(0)+'k'; return formatCurrency(v); }
 function toNumber(v){ const n=parseFloat(v); return isNaN(n)?0:n; }
 
 /* DOM refs */
@@ -297,7 +282,6 @@ const homePriceEl = document.getElementById('homePrice');
 const downPctEl = document.getElementById('downPct');
 const termYearsEl = document.getElementById('termYears');
 const rateEl = document.getElementById('rate');
-const freqEl = document.getElementById('freq');
 const startMonthEl = document.getElementById('startMonth');
 const startYearEl = document.getElementById('startYear');
 
@@ -333,12 +317,13 @@ let chartInstance = null;
 let lastResult = null;
 let activeView = 'monthly';
 
-/* populate months */
+/* populate month select */
 (function fillMonths(){ const sel=startMonthEl; sel.innerHTML=''; for(let m=0;m<12;m++){const o=document.createElement('option');o.value=m;o.text=new Date(0,m).toLocaleString(undefined,{month:'short'});sel.appendChild(o);} })();
 
-/* schedule calculation (period-based, safe) */
+/* compute schedule — monthly only */
 function computeSchedule(opts){
-  const { loanAmount, annualRate, termYears, paymentsPerYear, extraMonthly, extraYearly, extraOneTime, startMonth, startYear } = opts;
+  const { loanAmount, annualRate, termYears, extraMonthly, extraYearly, extraOneTime, startMonth, startYear } = opts;
+  const paymentsPerYear = 12; // fixed monthly
   const P = loanAmount;
   const r = annualRate/100/paymentsPerYear;
   const n = Math.max(1, Math.round(termYears * paymentsPerYear));
@@ -348,13 +333,9 @@ function computeSchedule(opts){
   let curMonth = startMonth, curYear = startYear;
   const schedule = [];
 
-  // convert extra monthly to per-period amount
-  let extraPerPeriod = 0;
-  if (paymentsPerYear === 12) extraPerPeriod = Number(extraMonthly) || 0;
-  else if (paymentsPerYear === 26) extraPerPeriod = (Number(extraMonthly) || 0) * 12 / 26;
-  else extraPerPeriod = (Number(extraMonthly) || 0) * 12 / paymentsPerYear;
+  const extraPerPeriod = (Number(extraMonthly) || 0);
 
-  const safety = n + 20; // small safety margin
+  const safety = n + 24;
   while (balance > 0.0005 && period < safety){
     period++;
     const interest = balance * r;
@@ -364,7 +345,6 @@ function computeSchedule(opts){
     if (Number(extraYearly) && curMonth === Number(startMonth)) extraThis += Number(extraYearly);
     if (period === 1 && Number(extraOneTime)) extraThis += Number(extraOneTime);
 
-    // avoid overshoot
     if (principal + extraThis > balance) extraThis = Math.max(0, balance - principal);
 
     const payment = principal + interest + extraThis;
@@ -373,14 +353,7 @@ function computeSchedule(opts){
     const labelMonth = new Date(curYear, curMonth).toLocaleString(undefined,{month:'short'});
     schedule.push({ period, dateLabel: `${labelMonth} ${curYear}`, payment, interest, principal, extra: extraThis, balance });
 
-    // advance date approx
-    if (paymentsPerYear === 12){
-      curMonth++; if (curMonth>11){curMonth=0;curYear++;}
-    } else if (paymentsPerYear === 26){
-      if (period%2===0){curMonth++; if (curMonth>11){curMonth=0;curYear++;}}
-    } else {
-      if (period % Math.max(1, Math.round(paymentsPerYear/12)) === 0){ curMonth++; if (curMonth>11){curMonth=0;curYear++;} }
-    }
+    curMonth++; if (curMonth>11){curMonth=0;curYear++;}
   }
 
   const totalPayment = schedule.reduce((s,x)=>s+x.payment,0);
@@ -389,7 +362,7 @@ function computeSchedule(opts){
   // annual grouping
   const annualMap = {};
   schedule.forEach(s=>{
-    const y = s.dateLabel.split(' ').pop(); // year part
+    const y = s.dateLabel.split(' ').pop();
     if (!annualMap[y]) annualMap[y] = { year: y, payment:0, interest:0, principal:0, extra:0, endBalance: s.balance };
     annualMap[y].payment += s.payment;
     annualMap[y].interest += s.interest;
@@ -402,7 +375,7 @@ function computeSchedule(opts){
   return { schedule, annual, payment: regularPayment, totalPayment, totalInterest, periods: schedule.length };
 }
 
-/* Chart rendering + mobile adaptations */
+/* chart: show year ticks more clearly on x-axis */
 function renderChart(schedule){
   const labels = schedule.map(s => s.dateLabel);
   const balances = schedule.map(s => s.balance);
@@ -410,8 +383,8 @@ function renderChart(schedule){
   const payments = schedule.map(s => s.payment);
 
   if (chartInstance) chartInstance.destroy();
-
   const ctx = amortChartCanvas.getContext('2d');
+
   chartInstance = new Chart(ctx, {
     type:'line',
     data:{
@@ -431,7 +404,31 @@ function renderChart(schedule){
       },
       scales:{
         y:{ ticks:{ callback: (v)=> (window.innerWidth<=640? formatCurrencyShort(v) : formatCurrency(v)), maxTicksLimit:6 }, grid:{ color:'#eef6fb' } },
-        x:{ ticks:{ autoSkip:true, maxTicksLimit:6, callback: function(val, idx){ const small = window.innerWidth<=640; const step = small? Math.ceil(labels.length/5) : Math.ceil(labels.length/12); return (idx%step===0)? labels[idx] : ''; } }, grid:{ display:false } }
+        x:{ 
+          ticks:{ 
+            autoSkip:true, 
+            maxRotation:0,
+            callback: function(value, index, ticks){
+              // show month-year labels selectively: on small screens show year when month is Jan,
+              // otherwise show month + short year on larger screens
+              const label = this.getLabelForValue(value) || '';
+              const parts = label.split(' ');
+              if (parts.length < 2) return label;
+              const month = parts[0], year = parts[1];
+              const small = window.innerWidth <= 640;
+              if (small){
+                // show only year when January (every Jan) or every 24 months if very sparse
+                const showYear = month === 'Jan' || index % 24 === 0;
+                return showYear ? year : '';
+              } else {
+                // show every ~12 ticks as month year
+                const show = index % Math.ceil(Math.max(1, labels.length / 8)) === 0;
+                return show ? label : '';
+              }
+            }
+          },
+          grid:{ display:false }
+        }
       },
       interaction:{ mode:'nearest', intersect:false },
       elements:{ line:{ tension:0.25 } },
@@ -440,7 +437,7 @@ function renderChart(schedule){
   });
 }
 
-/* Render table (desktop) */
+/* Render monthly table + cards */
 function renderMonthlyTable(schedule){
   monthlyTableEl.innerHTML = '';
   if (!schedule || schedule.length===0) return;
@@ -458,7 +455,7 @@ function renderMonthlyTable(schedule){
   monthlyTableEl.appendChild(tbl);
 }
 
-/* Render annual table */
+/* Render annual table properly */
 function renderAnnualTable(annual){
   annualTableEl.innerHTML = '';
   if (!annual || annual.length===0) return;
@@ -476,11 +473,10 @@ function renderAnnualTable(annual){
   annualTableEl.appendChild(tbl);
 }
 
-/* Render mobile stacked cards for monthly schedule */
+/* Mobile stacked cards */
 function renderMonthlyCards(schedule){
   monthlyCardsEl.innerHTML = '';
   if (!schedule || schedule.length===0) return;
-  // show first 24 rows by default then a "show more" button for performance
   const limit = Math.min(schedule.length, 24);
   for(let i=0;i<limit;i++){
     const s = schedule[i];
@@ -514,7 +510,6 @@ function calculate(){
   const loan = Math.max(0, home * (1 - downPct/100));
   const termYears = toNumber(termYearsEl.value);
   const rate = toNumber(rateEl.value);
-  const freq = Number(freqEl.value) || 12;
   const startMonth = Number(startMonthEl.value || 0);
   const startYear = Number(startYearEl.value || new Date().getFullYear());
 
@@ -526,20 +521,14 @@ function calculate(){
     loanAmount: loan,
     annualRate: rate,
     termYears,
-    paymentsPerYear: freq,
     extraMonthly, extraYearly, extraOneTime: extraOne,
     startMonth, startYear
   });
 
   lastResult = res;
 
-  // monthly shown payment includes extra per-period equivalent
-  let extraPerPeriod = 0;
-  if (freq === 12) extraPerPeriod = extraMonthly;
-  else if (freq === 26) extraPerPeriod = extraMonthly * 12 / 26;
-  else extraPerPeriod = extraMonthly * 12 / freq;
-
-  monthlyOut.textContent = formatCurrency((res.payment||0) + extraPerPeriod);
+  // monthly display uses payment + extra monthly
+  monthlyOut.textContent = formatCurrency((res.payment||0) + (Number(extraMonthly)||0));
   totalOut.textContent = formatCurrency(res.totalPayment);
   interestOut.textContent = formatCurrency(res.totalInterest);
   payoffOut.textContent = res.schedule.length? res.schedule[res.schedule.length-1].dateLabel : '-';
@@ -550,7 +539,7 @@ function calculate(){
   renderMonthlyCards(res.schedule);
 }
 
-/* CSV export (basic) */
+/* CSV export */
 function downloadCSV(){
   if (!lastResult) return alert('Calculate first');
   const rows = [['Period','Date','Payment','Principal','Interest','Extra','EndingBalance']];
@@ -566,7 +555,7 @@ function downloadCSV(){
 calcBtn.addEventListener('click', calculate);
 resetBtn.addEventListener('click', ()=>{
   homePriceEl.value = 400000; downPctEl.value = 20; termYearsEl.value = 30; rateEl.value = 6.228;
-  freqEl.value = 12; startMonthEl.value = new Date().getMonth(); startYearEl.value = new Date().getFullYear();
+  startMonthEl.value = new Date().getMonth(); startYearEl.value = new Date().getFullYear();
   propTaxEl.value = 1.2; insuranceEl.value = 1500; pmiEl.value = 0; hoaEl.value = 0; otherCostsEl.value = 4000; costIncreaseEl.value=0;
   extraMonthlyEl.value = 0; extraYearlyEl.value = 0; extraOneEl.value = 0;
   monthlyOut.textContent = '$0.00'; totalOut.textContent = '$0.00'; interestOut.textContent = '$0.00'; payoffOut.textContent = '—';
@@ -577,13 +566,18 @@ csvBtn.addEventListener('click', downloadCSV);
 printBtn.addEventListener('click', ()=> window.print());
 
 btnMonthly.addEventListener('click', ()=>{
-  activeView='monthly'; btnMonthly.classList.add('active'); btnAnnual.classList.remove('active');
+  activeView='monthly';
+  btnMonthly.classList.add('active'); btnAnnual.classList.remove('active');
   monthlyTableEl.style.display = ''; annualTableEl.style.display = 'none';
-  // mobile cards always present
+  // keep mobile cards visible when monthly
+  monthlyCardsEl.style.display = '';
 });
 btnAnnual.addEventListener('click', ()=>{
-  activeView='annual'; btnAnnual.classList.add('active'); btnMonthly.classList.remove('active');
+  activeView='annual';
+  btnAnnual.classList.add('active'); btnMonthly.classList.remove('active');
   monthlyTableEl.style.display = 'none'; annualTableEl.style.display = '';
+  // hide mobile monthly cards when annual active
+  monthlyCardsEl.style.display = 'none';
 });
 
 /* currency change re-render */
