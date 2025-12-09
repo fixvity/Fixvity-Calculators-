@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Mortgage Calculator — Fixvity (Patched)</title>
+<title>Mortgage Calculator — Fixvity</title>
 
+<!-- Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -33,7 +34,6 @@
     max-width:var(--container-max);
     margin:22px auto;
     padding:18px;
-    overflow-x:visible;
   }
 
   header h1{margin:0;font-size:36px;color:var(--accent)}
@@ -45,7 +45,6 @@
     box-shadow:var(--shadow);
     padding:18px;
     margin-bottom:18px;
-    overflow:visible;
   }
 
   .grid{
@@ -81,7 +80,7 @@
   .result-row h3{margin:0;color:var(--accent);font-size:16px}
   .result-row .value{font-weight:700;font-size:18px}
 
-  .chartWrap{background:var(--card);padding:12px;border-radius:8px;box-shadow:var(--shadow);overflow:visible}
+  .chartWrap{background:var(--card);padding:12px;border-radius:8px;box-shadow:var(--shadow)}
   .chartBox{height:260px;position:relative;}
   .chartBox.tall{height:300px}
 
@@ -150,9 +149,11 @@
         <option value="INR">INR - ₹</option>
       </select>
     </div>
+    <button id="printBtn" class="btn alt">Print</button>
   </div>
 
   <div class="grid">
+    <!-- LEFT: Inputs -->
     <div>
       <div class="card">
         <div style="display:flex;gap:12px;align-items:center;margin-bottom:8px">
@@ -196,9 +197,9 @@
           </div>
         </div>
 
-        <hr style="border:none;border-top:1px solid #eef2f6;margin:10px 0">
+                <hr style="border:none;border-top:1px solid #eef2f6;margin:10px 0" />
 
-        <div style="font-weight:700        <div style="font-weight:700;margin-bottom:8px">Include Taxes &amp; Costs</div>
+        <div style="font-weight:700;margin-bottom:8px">Include Taxes &amp; Costs</div>
 
         <div class="form-row">
           <div class="col form-group">
@@ -256,10 +257,6 @@
           <button id="calcBtn" class="btn">Calculate</button>
           <button id="resetBtn" class="btn alt">Reset</button>
           <button id="csvBtn" class="btn alt">Download CSV</button>
-          <button id="printBtn" class="btn alt">Print</button>
-        </div>
-        <div class="small" style="margin-top:8px">
-          Tip: fees/tax are included in the loan calculation by default.
         </div>
       </div>
     </div>
@@ -327,7 +324,10 @@ function formatCurrency(v){
     maximumFractionDigits:info.dec
   });
 }
-function toNumber(v){ const n = parseFloat(v); return isNaN(n) ? 0 : n; }
+function toNumber(v){
+  const n = parseFloat(v);
+  return isNaN(n) ? 0 : n;
+}
 
 /* month select */
 (function fillMonths(){
@@ -342,39 +342,39 @@ function toNumber(v){ const n = parseFloat(v); return isNaN(n) ? 0 : n; }
 })();
 
 /* DOM refs */
-const homePriceEl = document.getElementById('homePrice');
-const downPctEl = document.getElementById('downPct');
-const termYearsEl = document.getElementById('termYears');
-const rateEl = document.getElementById('rate');
-const freqEl = document.getElementById('freq');
-const startMonthEl = document.getElementById('startMonth');
-const startYearEl = document.getElementById('startYear');
+const homePriceEl   = document.getElementById('homePrice');
+const downPctEl     = document.getElementById('downPct');
+const termYearsEl   = document.getElementById('termYears');
+const rateEl        = document.getElementById('rate');
+const freqEl        = document.getElementById('freq');
+const startMonthEl  = document.getElementById('startMonth');
+const startYearEl   = document.getElementById('startYear');
 
-const extraMonthlyEl = document.getElementById('extraMonthly');
+const extraMonthlyEl= document.getElementById('extraMonthly');
 const extraYearlyEl = document.getElementById('extraYearly');
-const extraOneEl = document.getElementById('extraOne');
+const extraOneEl    = document.getElementById('extraOne');
 
-const calcBtn = document.getElementById('calcBtn');
-const resetBtn = document.getElementById('resetBtn');
-const csvBtn = document.getElementById('csvBtn');
-const printBtn = document.getElementById('printBtn');
+const calcBtn       = document.getElementById('calcBtn');
+const resetBtn      = document.getElementById('resetBtn');
+const csvBtn        = document.getElementById('csvBtn');
+const printBtn      = document.getElementById('printBtn');
 
-const monthlyOut = document.getElementById('monthlyOut');
-const totalOut = document.getElementById('totalOut');
-const interestOut = document.getElementById('interestOut');
-const payoffOut = document.getElementById('payoffOut');
+const monthlyOut    = document.getElementById('monthlyOut');
+const totalOut      = document.getElementById('totalOut');
+const interestOut   = document.getElementById('interestOut');
+const payoffOut     = document.getElementById('payoffOut');
 
-const amortCtxEl = document.getElementById('amortChart');
-const monthlyTableEl = document.getElementById('monthlyTable');
+const amortCtxEl    = document.getElementById('amortChart');
+const monthlyTableEl= document.getElementById('monthlyTable');
 const annualTableEl = document.getElementById('annualTable');
-const btnAnnual = document.getElementById('btnAnnual');
-const btnMonthly = document.getElementById('btnMonthly');
+const btnAnnual     = document.getElementById('btnAnnual');
+const btnMonthly    = document.getElementById('btnMonthly');
 
 let amortChart = null;
 let lastResult = null;
 let activeView = 'monthly';
 
-/* ---------- schedule ---------- */
+/* schedule */
 function computeSchedule(opts){
   const {
     loanAmount, annualRate, termYears, paymentsPerYear,
@@ -387,21 +387,21 @@ function computeSchedule(opts){
   const regularPayment = (r === 0) ? (P / n) : (P * (r / (1 - Math.pow(1 + r, -n))));
 
   let balance = P;
-  let period = 0;
+  let period  = 0;
   const schedule = [];
   let curMonth = startMonth;
-  let curYear = startYear;
+  let curYear  = startYear;
 
   let extraPeriod = 0;
   if (paymentsPerYear === 12) extraPeriod = Number(extraMonthly) || 0;
-  else if (paymentsPerYear === 26) extraPeriod = (Number(extraMonthly) || 0) * 12 / 26;
-  else extraPeriod = (Number(extraMonthly) || 0) * 12 / paymentsPerYear;
+  else if (paymentsPerYear === 26) extraPeriod = (Number(extraMonthly)||0) * 12 / 26;
+  else extraPeriod = (Number(extraMonthly)||0) * 12 / paymentsPerYear;
 
   while (balance > 0.0005 && period < n * 3){
     period++;
     const interest = balance * r;
-    let principal = Math.max(0, regularPayment - interest);
-    let extraThis = 0;
+    let principal  = Math.max(0, regularPayment - interest);
+    let extraThis  = 0;
 
     extraThis += extraPeriod;
     if (Number(extraYearly) && curMonth === Number(startMonth)) extraThis += Number(extraYearly);
@@ -432,38 +432,34 @@ function computeSchedule(opts){
         if (curMonth > 11){ curMonth = 0; curYear++; }
       }
     } else {
-      if (period % Math.max(1, Math.round(paymentsPerYear / 12)) === 0){
+            if (period % Math.max(1, Math.round(paymentsPerYear / 12)) === 0){
         curMonth++;
         if (curMonth > 11){ curMonth = 0; curYear++; }
       }
     }
   }
 
-  const totalPayment = schedule.reduce((s,x)=>s + x.payment, 0);
-  const totalInterest = schedule.reduce((s,x)=>s + x.interest, 0);
+  const totalPayment  = schedule.reduce((s,x)=>s + x.payment ,0);
+  const totalInterest = schedule.reduce((s,x)=>s + x.interest,0);
 
   const annualMap = {};
   schedule.forEach(s=>{
     const y = s.date.year;
-    if (!annualMap[y])
-        const annualMap = {};
-  schedule.forEach(s=>{
-    const y = s.date.year;
-    if (!annualMap[y]) {
+    if (!annualMap[y]){
       annualMap[y] = { year:y, payment:0, interest:0, principal:0, extra:0, endBalance:s.balance };
     }
-    annualMap[y].payment  += s.payment;
-    annualMap[y].interest += s.interest;
-    annualMap[y].principal+= s.principal;
-    annualMap[y].extra    += s.extra;
-    annualMap[y].endBalance = s.balance;
+    annualMap[y].payment    += s.payment;
+    annualMap[y].interest   += s.interest;
+    annualMap[y].principal  += s.principal;
+    annualMap[y].extra      += s.extra;
+    annualMap[y].endBalance  = s.balance;
   });
 
   const annual = Object.values(annualMap).sort((a,b)=>a.year - b.year);
   return { schedule, annual, payment:regularPayment, totalPayment, totalInterest, periods:schedule.length };
 }
 
-/* ---------- chart ---------- */
+/* chart */
 function renderChart(schedule){
   const labels    = schedule.map(s=>s.date.label);
   const balances  = schedule.map(s=>s.balance);
@@ -497,7 +493,7 @@ function renderChart(schedule){
   });
 }
 
-/* ---------- tables ---------- */
+/* tables */
 function renderMonthlyTable(schedule){
   monthlyTableEl.innerHTML =
     '<table><thead><tr>' +
@@ -542,7 +538,7 @@ function renderAnnualTable(annual){
   });
 }
 
-/* ---------- main calculate ---------- */
+/* main calculate */
 function calculate(){
   const home      = toNumber(homePriceEl.value);
   const downPct   = toNumber(downPctEl.value);
@@ -588,7 +584,7 @@ function calculate(){
   }
 }
 
-/* ---------- CSV & events ---------- */
+/* CSV */
 function downloadCSV(){
   if (!lastResult){
     alert('Calculate first');
@@ -619,19 +615,18 @@ function downloadCSV(){
   URL.revokeObjectURL(url);
 }
 
-calcBtn.addEventListener('click', calculate);
-
-resetBtn.addEventListener('click', ()=>{
-  homePriceEl.value  = 400000;
-  downPctEl.value    = 20;
-  termYearsEl.value  = 30;
-  rateEl.value       = 6.228;
-  freqEl.value       = 12;
-  startMonthEl.value = new Date().getMonth();
-  startYearEl.value  = new Date().getFullYear();
-  extraMonthlyEl.value = 0;
-  extraYearlyEl.value  = 0;
-  extraOneEl.value     = 0;
+/* reset */
+function resetAll(){
+  homePriceEl.value   = 400000;
+  downPctEl.value     = 20;
+  termYearsEl.value   = 30;
+  rateEl.value        = 6.228;
+  freqEl.value        = 12;
+  startMonthEl.value  = new Date().getMonth();
+  startYearEl.value   = new Date().getFullYear();
+  extraMonthlyEl.value= 0;
+  extraYearlyEl.value = 0;
+  extraOneEl.value    = 0;
 
   monthlyOut.textContent  = formatCurrency(0);
   totalOut.textContent    = formatCurrency(0);
@@ -641,26 +636,24 @@ resetBtn.addEventListener('click', ()=>{
   annualTableEl.innerHTML  = '';
   if (amortChart) amortChart.destroy();
   lastResult = null;
-});
+}
 
-csvBtn.addEventListener('click', downloadCSV);
-printBtn.addEventListener('click', ()=>window.print());
-
-btnMonthly.addEventListener('click', ()=>{
+/* view toggles */
+function showMonthly(){
   activeView = 'monthly';
   btnMonthly.classList.add('active');
   btnAnnual.classList.remove('active');
   if (lastResult) renderMonthlyTable(lastResult.schedule);
-});
-
-btnAnnual.addEventListener('click', ()=>{
+}
+function showAnnual(){
   activeView = 'annual';
   btnAnnual.classList.add('active');
   btnMonthly.classList.remove('active');
   if (lastResult) renderAnnualTable(lastResult.annual);
-});
+}
 
-document.getElementById('currencyTop').addEventListener('change', ()=>{
+/* currency change */
+function handleCurrencyChange(){
   if (!lastResult) return;
   monthlyOut.textContent  = formatCurrency(lastResult.payment);
   totalOut.textContent    = formatCurrency(lastResult.totalPayment);
@@ -668,12 +661,22 @@ document.getElementById('currencyTop').addEventListener('change', ()=>{
   if (activeView === 'monthly') renderMonthlyTable(lastResult.schedule);
   else renderAnnualTable(lastResult.annual);
   if (amortChart) renderChart(lastResult.schedule);
-});
+}
 
 /* init */
 document.addEventListener('DOMContentLoaded', ()=>{
   startYearEl.value  = new Date().getFullYear();
   startMonthEl.value = new Date().getMonth();
+
+  calcBtn.addEventListener('click', calculate);
+  resetBtn.addEventListener('click', resetAll);
+  csvBtn.addEventListener('click', downloadCSV);
+  printBtn.addEventListener('click', ()=>window.print());
+  btnMonthly.addEventListener('click', showMonthly);
+  btnAnnual.addEventListener('click', showAnnual);
+  document.getElementById('currencyTop')
+          .addEventListener('change', handleCurrencyChange);
+
   calculate();
 });
 </script>
