@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mortgage Calculator</title>
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -53,7 +52,7 @@ label{
   margin-bottom:6px;
   display:block;
 }
-input,select{
+input{
   width:100%;
   padding:12px;
   border-radius:10px;
@@ -142,7 +141,6 @@ thead{
 
 <!-- LEFT -->
 <div class="card">
-
   <div class="section">
     <h3>Loan Details</h3>
     <label>Home Price</label>
@@ -225,81 +223,90 @@ thead{
 </div>
 
 <script>
-let chart, monthlyData=[], yearlyData=[];
+let chart, monthlyRows="", yearlyRows="", monthlyBalances=[], yearlyBalances=[];
 
 const fmt = n => new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(n);
 
 function calculate(){
-  let P = price.value * (1 - down.value/100);
-  let r = rate.value/100/12;
-  let n = years.value*12;
+  let home = +price.value;
+  let downPct = +down.value/100;
+  let loan = home*(1-downPct);
+  let r = +rate.value/100/12;
+  let n = +years.value*12;
   let extra = +extra.value;
 
-  let m = P * (r / (1 - Math.pow(1+r,-n)));
-  let bal=P, tiSum=0;
-  monthlyData=[]; yearlyData=[];
+  let annualTax = loan*(+tax.value/100);
+  let monthlyTax = annualTax/12;
+  let monthlyInsurance = +insurance.value/12;
 
-  let rowsM="", rowsY="";
-  let yearInterest=0, yearPrincipal=0;
+  let basePayment = loan*(r/(1-Math.pow(1+r,-n)));
+  let payment = basePayment + monthlyTax + monthlyInsurance + extra;
+
+  let bal=loan, totalInterest=0;
+  monthlyRows=""; yearlyRows="";
+  monthlyBalances=[]; yearlyBalances=[];
+
+  let yInt=0, yPrin=0, yPay=0;
 
   for(let i=1;i<=n;i++){
     let interest = bal*r;
-    let principal = m - interest + extra;
+    let principal = basePayment - interest + extra;
     if(principal>bal) principal=bal;
     bal-=principal;
-    tiSum+=interest;
 
-    monthlyData.push(bal);
-    rowsM+=`<tr>
+    totalInterest+=interest;
+    monthlyBalances.push(bal);
+
+    monthlyRows+=`
+    <tr>
       <td>${i}</td>
-      <td>${fmt(m+extra)}</td>
+      <td>${fmt(payment)}</td>
       <td>${fmt(principal)}</td>
       <td>${fmt(interest)}</td>
       <td>${fmt(Math.max(0,bal))}</td>
     </tr>`;
 
-    yearInterest+=interest;
-    yearPrincipal+=principal;
+    yInt+=interest; yPrin+=principal; yPay+=payment;
 
     if(i%12===0){
-      yearlyData.push(bal);
-      rowsY+=`<tr>
+      yearlyBalances.push(bal);
+      yearlyRows+=`
+      <tr>
         <td>${i/12}</td>
-        <td>${fmt((m+extra)*12)}</td>
-        <td>${fmt(yearPrincipal)}</td>
-        <td>${fmt(yearInterest)}</td>
+        <td>${fmt(yPay)}</td>
+        <td>${fmt(yPrin)}</td>
+        <td>${fmt(yInt)}</td>
         <td>${fmt(Math.max(0,bal))}</td>
       </tr>`;
-      yearInterest=yearPrincipal=0;
+      yInt=yPrin=yPay=0;
     }
     if(bal<=0)break;
   }
 
-  mp.textContent=fmt(m+extra);
-  ti.textContent=fmt(tiSum);
-  po.textContent=Math.ceil(monthlyData.length/12)+" yrs";
+  mp.textContent=fmt(payment);
+  ti.textContent=fmt(totalInterest);
+  po.textContent=Math.floor(monthlyBalances.length/12)+" yrs "+(monthlyBalances.length%12)+" mo";
 
-  window.rowsMonthly=rowsM;
-  window.rowsYearly=rowsY;
   showMonthly();
-  renderChart(monthlyData);
+  renderChart(monthlyBalances);
 }
 
 function renderChart(data){
   chart?.destroy();
-  chart=new Chart(document.getElementById("balanceChart"),{
+  chart=new Chart(balanceChart,{
     type:"line",
-    data:{labels:data.map((_,i)=>i+1),datasets:[{data,borderColor:"#1f6fb6",fill:true}]},
+    data:{labels:data.map((_,i)=>i+1),
+    datasets:[{data,borderColor:"#1f6fb6",fill:true}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
   });
 }
 
 function showMonthly(){
-  rows.innerHTML=window.rowsMonthly;
+  rows.innerHTML=monthlyRows;
   mBtn.classList.add("active"); yBtn.classList.remove("active");
 }
 function showYearly(){
-  rows.innerHTML=window.rowsYearly;
+  rows.innerHTML=yearlyRows;
   yBtn.classList.add("active"); mBtn.classList.remove("active");
 }
 
