@@ -2,37 +2,59 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Mortgage Calculator – Pro</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 :root{
-  --accent:#1f6fb6;--bg:#f7fbfd;--card:#fff;--muted:#6b7280;
-  --radius:12px;--shadow:0 8px 28px rgba(10,20,30,.08);
+  --accent:#1f6fb6;
+  --bg:#f7fbfd;
+  --card:#ffffff;
+  --muted:#6b7280;
+  --radius:12px;
+  --shadow:0 8px 28px rgba(10,20,30,.06);
+  --max:1200px;
 }
 *{box-sizing:border-box}
-body{margin:0;font-family:Inter,system-ui;background:var(--bg);color:#111}
-.wrap{max-width:1150px;margin:auto;padding:16px}
-h1{color:var(--accent);margin:0}
+body{margin:0;font-family:Inter,system-ui,Arial;background:var(--bg);color:#111}
+.wrap{max-width:var(--max);margin:auto;padding:16px}
+h1{margin:0;color:var(--accent)}
+p{color:var(--muted)}
+
 .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:16px}
-label{font-size:13px;color:var(--muted)}
-input,select{width:100%;padding:12px;border-radius:10px;border:1px solid #e5edf4;font-size:15px}
-.grid{display:grid;gap:18px}
-@media(min-width:900px){.grid{grid-template-columns:1fr 420px}}
+label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
+input,select{width:100%;padding:11px;border:1px solid #e5eef5;border-radius:10px;font-size:15px}
 
-.btn{padding:10px 14px;border-radius:8px;border:none;background:var(--accent);color:#fff;font-weight:600;cursor:pointer}
-.btn.alt{background:#eef6fb;color:var(--accent)}
-.small{font-size:13px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:1fr}
+@media(min-width:900px){.grid{grid-template-columns:1fr 440px;gap:18px}}
 
-.chartBox{height:260px}
-table{width:100%;border-collapse:collapse}
-th,td{padding:8px;border-bottom:1px solid #e8eef3;font-size:14px}
-th{background:#2f6b9f;color:#fff}
+.btn{padding:10px 14px;border-radius:8px;border:none;font-weight:600;cursor:pointer}
+.primary{background:var(--accent);color:#fff}
+.alt{background:#eef6fb;color:var(--accent)}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.col{flex:1}
+
+.summary{font-size:14px}
+.summary strong{color:#111}
+
+.chartBox{height:280px}
+canvas{width:100%!important;height:100%!important}
+
+table{width:100%;border-collapse:collapse;min-width:760px}
+th,td{padding:10px;border-bottom:1px solid #edf2f7;text-align:right;font-size:14px}
+th{background:#2f6b9f;color:#fff;position:sticky;top:0}
+td:first-child,th:first-child{text-align:center}
+td:nth-child(2),th:nth-child(2){text-align:left}
+
+.scroll{overflow:auto}
+.toggle{display:flex;gap:6px}
+.toggle button{padding:6px 10px;border-radius:6px;border:1px solid #dbe9f6;background:#f8fbff}
+.toggle .active{background:var(--accent);color:#fff}
 
 @media print{
-  button,.small{display:none}
+  .btn,.toggle{display:none}
   body{background:#fff}
 }
 </style>
@@ -41,11 +63,8 @@ th{background:#2f6b9f;color:#fff}
 <body>
 <div class="wrap">
 <h1>Mortgage Calculator</h1>
-<p class="small">Monthly payment, amortization, charts & printable results</p>
+<p>Monthly payment, amortization, charts & printable results</p>
 
-<div class="grid">
-
-<!-- INPUTS -->
 <div class="card">
 <label>Currency</label>
 <select id="currency">
@@ -54,87 +73,89 @@ th{background:#2f6b9f;color:#fff}
 <option value="GBP">£ GBP</option>
 <option value="INR">₹ INR</option>
 </select>
+</div>
 
-<br><br>
+<div class="grid">
 
+<!-- INPUTS -->
+<div class="card">
+<div class="row">
+<div class="col">
 <label>Home Price</label>
-<input id="price" type="number" value="400000">
+<input id="price" value="400000">
+</div>
+<div style="width:120px">
+<label>Down (%)</label>
+<input id="down" value="20">
+</div>
+</div>
 
-<label>Down Payment (%)</label>
-<input id="down" type="number" value="20">
-
+<div class="row">
+<div class="col">
 <label>Loan Term (years)</label>
-<input id="years" type="number" value="30">
-
+<input id="years" value="30">
+</div>
+<div class="col">
 <label>Interest Rate (%)</label>
-<input id="rate" type="number" value="6.228" step="0.001">
+<input id="rate" value="6.228">
+</div>
+</div>
 
 <hr>
 
-<label>Property Tax (% / yr)</label>
-<input id="tax" type="number" value="1.2">
+<strong>Taxes & Costs</strong>
+<div class="row">
+<div class="col"><label>Property Tax (%/yr)</label><input id="tax" value="1.2"></div>
+<div class="col"><label>Insurance (annual)</label><input id="insurance" value="1500"></div>
+</div>
 
-<label>Insurance (annual)</label>
-<input id="insurance" type="number" value="1500">
-
-<label>PMI (annual)</label>
-<input id="pmi" type="number" value="0">
-
-<label>HOA (annual)</label>
-<input id="hoa" type="number" value="0">
-
-<label>Other Costs (annual)</label>
-<input id="other" type="number" value="4000">
+<div class="row">
+<div class="col"><label>PMI (annual)</label><input id="pmi" value="0"></div>
+<div class="col"><label>HOA (annual)</label><input id="hoa" value="0"></div>
+</div>
 
 <hr>
 
-<label>Extra Monthly Payment</label>
-<input id="extraM" type="number" value="0">
+<strong>Extra Payments</strong>
+<div class="row">
+<div class="col"><label>Extra Monthly</label><input id="extraM" value="0"></div>
+<div class="col"><label>Extra Yearly</label><input id="extraY" value="0"></div>
+</div>
 
-<label>Extra Yearly Payment</label>
-<input id="extraY" type="number" value="0">
-
-<label>Extra One-Time Payment</label>
-<input id="extraO" type="number" value="0">
-
-<br><br>
-<button class="btn" onclick="calculate()">Calculate</button>
+<div class="row">
+<button class="btn primary" onclick="calculate()">Calculate</button>
 <button class="btn alt" onclick="location.reload()">Reset</button>
+<button class="btn alt" onclick="downloadCSV()">CSV</button>
+<button class="btn alt" onclick="window.print()">Print</button>
+</div>
 </div>
 
 <!-- RESULTS -->
 <div class="card">
+<div class="row">
 <div>
-<b>Monthly Payment</b>
-<h2 id="monthly">$0.00</h2>
-
-<p>Total Paid: <b id="total">$0.00</b></p>
-<p>Total Interest: <b id="interest">$0.00</b></p>
-<p>Payoff Date: <b id="payoff">—</b></p>
+<div class="summary">Loan Payment</div>
+<h2 id="loanPay">$0</h2>
+<div class="summary">Housing Cost: <strong id="housePay">$0</strong></div>
+</div>
+<div class="summary">
+<div>Total Paid: <strong id="totalPaid">$0</strong></div>
+<div>Total Interest: <strong id="totalInt">$0</strong></div>
+<div>Payoff: <strong id="payoff">—</strong></div>
+</div>
 </div>
 
-<div class="chartBox">
-<canvas id="chart"></canvas>
+<div class="chartBox"><canvas id="chart"></canvas></div>
+
+<div class="toggle">
+<button id="mBtn" class="active" onclick="showMonthly()">Monthly</button>
+<button id="aBtn" onclick="showAnnual()">Annual</button>
 </div>
 
-<h3>Amortization Schedule</h3>
-<table>
-<thead>
-<tr>
-<th>#</th>
-<th>Date</th>
-<th>Payment</th>
-<th>Interest</th>
-<th>Balance</th>
-</tr>
-</thead>
-<tbody id="table"></tbody>
-</table>
+<div class="scroll" id="monthlyWrap"></div>
+<div class="scroll" id="annualWrap" style="display:none"></div>
 
-<br>
-<button class="btn alt" onclick="window.print()">🖨 Print</button>
 </div>
-
 </div>
 </div>
 
@@ -142,61 +163,90 @@ th{background:#2f6b9f;color:#fff}
 let chart;
 
 function fmt(n){
-  const c=document.getElementById('currency').value;
-  const map={USD:'$',EUR:'€',GBP:'£',INR:'₹'};
-  return map[c]+n.toFixed(2);
+ const c=document.getElementById("currency").value;
+ return new Intl.NumberFormat("en",{style:"currency",currency:c}).format(n);
 }
 
 function calculate(){
-  const P=document.getElementById('price').value*(1-document.getElementById('down').value/100);
-  const r=document.getElementById('rate').value/100/12;
-  const n=document.getElementById('years').value*12;
+ const P=document.getElementById("price").value*(1-document.getElementById("down").value/100);
+ const r=document.getElementById("rate").value/100/12;
+ const n=document.getElementById("years").value*12;
 
-  const tax=P*(document.getElementById('tax').value/100)/12;
-  const ins=+document.getElementById('insurance').value/12;
-  const pmi=+document.getElementById('pmi').value/12;
-  const hoa=+document.getElementById('hoa').value/12;
-  const other=+document.getElementById('other').value/12;
+ const tax=P*(document.getElementById("tax").value/100)/12;
+ const ins=document.getElementById("insurance").value/12;
+ const pmi=document.getElementById("pmi").value/12;
+ const hoa=document.getElementById("hoa").value/12;
 
-  const extraM=+document.getElementById('extraM').value;
-  const extraY=+document.getElementById('extraY').value;
-  const extraO=+document.getElementById('extraO').value;
+ const extraM=+document.getElementById("extraM").value;
+ const extraY=+document.getElementById("extraY").value;
 
-  const base=P*r/(1-Math.pow(1+r,-n));
-  let balance=P,month=0,total=0,intTotal=0;
-  let rows='',labels=[],balances=[];
+ const pay=P*r/(1-Math.pow(1+r,-n));
 
-  while(balance>0 && month<1000){
-    month++;
-    let interest=balance*r;
-    let payment=base+extraM+tax+ins+pmi+hoa+other;
-    if(month===1) payment+=extraO;
-    if(month%12===1) payment+=extraY;
+ let bal=P,rows="",annual={},labels=[],data=[];
+ let totalPay=0,totalInt=0,month=0;
 
-    if(payment>balance+interest) payment=balance+interest;
+ while(bal>0 && month<1000){
+  month++;
+  const interest=bal*r;
+  let principal=pay-interest;
+  let extra=extraM+(month%12===1?extraY:0);
+  if(principal+extra>bal) extra=bal-principal;
+  bal-=principal+extra;
 
-    balance-=payment-interest;
-    total+=payment;
-    intTotal+=interest;
+  totalPay+=pay+extra;
+  totalInt+=interest;
 
-    labels.push('M'+month);
-    balances.push(balance);
+  labels.push("M"+month);
+  data.push(bal);
 
-    rows+=`<tr><td>${month}</td><td>M${month}</td><td>${fmt(payment)}</td><td>${fmt(interest)}</td><td>${fmt(balance)}</td></tr>`;
-  }
+  rows+=`<tr><td>${month}</td><td>${fmt(pay+extra)}</td><td>${fmt(interest)}</td><td>${fmt(bal)}</td></tr>`;
 
-  document.getElementById('monthly').textContent=fmt(base+tax+ins+pmi+hoa+other+extraM);
-  document.getElementById('total').textContent=fmt(total);
-  document.getElementById('interest').textContent=fmt(intTotal);
-  document.getElementById('payoff').textContent=month+' months';
-  document.getElementById('table').innerHTML=rows;
+  const y=Math.ceil(month/12);
+  annual[y]=bal;
+ }
 
-  if(chart)chart.destroy();
-  chart=new Chart(document.getElementById('chart'),{
-    type:'line',
-    data:{labels,datasets:[{data:balances,label:'Balance',borderColor:'#1f6fb6',fill:true}]},
-    options:{responsive:true,maintainAspectRatio:false}
-  });
+ document.getElementById("loanPay").textContent=fmt(pay);
+ document.getElementById("housePay").textContent=fmt(pay+tax+ins+pmi+hoa);
+ document.getElementById("totalPaid").textContent=fmt(totalPay);
+ document.getElementById("totalInt").textContent=fmt(totalInt);
+ document.getElementById("payoff").textContent=`${Math.ceil(month/12)} yrs`;
+
+ document.getElementById("monthlyWrap").innerHTML=
+ `<table><thead><tr><th>#</th><th>Payment</th><th>Interest</th><th>Balance</th></tr></thead><tbody>${rows}</tbody></table>`;
+
+ let aRows="";
+ Object.keys(annual).forEach(y=>{
+  aRows+=`<tr><td>Year ${y}</td><td>${fmt(annual[y])}</td></tr>`;
+ });
+ document.getElementById("annualWrap").innerHTML=
+ `<table><thead><tr><th>Year</th><th>Ending Balance</th></tr></thead><tbody>${aRows}</tbody></table>`;
+
+ if(chart) chart.destroy();
+ chart=new Chart(document.getElementById("chart"),{
+  type:"line",
+  data:{labels,datasets:[{data,borderColor:"#1f6fb6",fill:true,backgroundColor:"rgba(31,111,182,.1)",pointRadius:0}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
+ });
+}
+
+function showMonthly(){
+ document.getElementById("monthlyWrap").style.display="";
+ document.getElementById("annualWrap").style.display="none";
+ mBtn.classList.add("active");aBtn.classList.remove("active");
+}
+function showAnnual(){
+ document.getElementById("monthlyWrap").style.display="none";
+ document.getElementById("annualWrap").style.display="";
+ aBtn.classList.add("active");mBtn.classList.remove("active");
+}
+
+function downloadCSV(){
+ const rows=[...document.querySelectorAll("#monthlyWrap tr")].map(r=>[...r.children].map(c=>c.innerText).join(",")).join("\n");
+ const b=new Blob([rows],{type:"text/csv"});
+ const a=document.createElement("a");
+ a.href=URL.createObjectURL(b);
+ a.download="mortgage.csv";
+ a.click();
 }
 
 calculate();
