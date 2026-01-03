@@ -7,108 +7,156 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-:root{
-  --primary:#2c5aa0;
-  --bg:#f5f7fb;
-  --card:#fff;
-  --border:#e6edf5;
-  --text:#1f2937;
-  --muted:#6b7280;
-  --radius:14px;
-  --shadow:0 12px 32px rgba(0,0,0,.08);
+body{
+  margin:0;
+  font-family:Inter,system-ui,Arial;
+  background:#f2f5f9;
+  color:#1f2937;
 }
-*{box-sizing:border-box}
-body{margin:0;font-family:system-ui;background:var(--bg);color:var(--text)}
-.container{max-width:1100px;margin:auto;padding:16px}
+.container{max-width:1200px;margin:auto;padding:20px}
 
 /* HEADER */
 .header{
-  background:var(--card);
-  padding:20px;
-  border-radius:var(--radius);
-  box-shadow:var(--shadow);
+  background:#fff;
+  padding:24px;
+  border-radius:14px;
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
   text-align:center;
 }
-.header h1{margin:0;color:var(--primary)}
-.header p{color:var(--muted);margin-top:6px}
+.header h1{margin:0;color:#2c5aa0}
+.header p{margin-top:8px;color:#6b7280}
 
 /* TABS */
 .tabs{
   display:flex;
-  background:var(--card);
-  border-radius:var(--radius);
-  box-shadow:var(--shadow);
-  margin:16px 0;
+  margin-top:18px;
+  background:#fff;
+  border-radius:12px;
+  box-shadow:0 8px 24px rgba(0,0,0,.08);
 }
 .tab{
   flex:1;
-  padding:14px;
+  padding:16px;
   border:none;
   background:none;
+  font-size:16px;
   font-weight:700;
   cursor:pointer;
-  color:#666;
+  color:#6b7280;
 }
-.tab.active{background:var(--primary);color:#fff}
+.tab.active{background:#2c5aa0;color:#fff}
 
 /* PANELS */
-.panel{display:none}
+.panel{display:none;margin-top:20px}
 .panel.active{display:block}
 
-.card{
-  background:var(--card);
-  padding:20px;
-  border-radius:var(--radius);
-  box-shadow:var(--shadow);
-  margin-bottom:16px;
+/* DEFINE */
+.define-grid{
+  background:#fff;
+  padding:24px;
+  border-radius:14px;
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
 }
-
-/* INPUTS */
 .input{margin-bottom:18px}
-.label{font-weight:600;margin-bottom:6px}
-.range-val{text-align:center;font-weight:700;color:var(--primary);margin-top:6px}
-input[type=range],input[type=date],select{width:100%}
+label{font-weight:600}
+input[type=range],input[type=date],select{
+  width:100%;
+  margin-top:6px;
+}
+.value{text-align:center;font-weight:700;color:#2c5aa0;margin-top:4px}
 
 /* BUTTONS */
-.btn-row{display:flex;gap:12px;margin-top:20px}
-.btn{flex:1;padding:14px;border-radius:10px;border:none;font-weight:700;cursor:pointer}
-.btn.primary{background:var(--primary);color:#fff}
-.btn.ghost{background:#eef3fb;color:var(--primary)}
+.actions{display:flex;gap:16px;margin-top:20px}
+button.main{
+  flex:2;
+  background:#2c5aa0;
+  color:#fff;
+  border:none;
+  padding:14px;
+  font-size:16px;
+  font-weight:700;
+  border-radius:10px;
+  cursor:pointer;
+}
+button.reset{
+  flex:1;
+  background:#eef2f7;
+  border:none;
+  padding:14px;
+  font-weight:700;
+  border-radius:10px;
+}
 
 /* CALCULATE */
 .hero{
   background:linear-gradient(135deg,#2c5aa0,#1e3a8a);
   color:#fff;
-  padding:30px;
+  padding:36px;
   border-radius:18px;
   text-align:center;
+  box-shadow:0 14px 40px rgba(0,0,0,.25);
 }
-.hero .amount{font-size:46px;font-weight:800}
+.hero h2{font-size:54px;margin:0}
 
 .breakdown{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
-  gap:14px;
-  margin:20px 0;
+  grid-template-columns:repeat(5,1fr);
+  gap:16px;
+  margin:24px 0;
 }
-.break{background:#f8fbff;padding:14px;border-radius:12px}
-.break small{color:var(--muted)}
-.break b{display:block;font-size:18px}
+.box{
+  background:#fff;
+  padding:18px;
+  border-radius:12px;
+  box-shadow:0 6px 18px rgba(0,0,0,.08);
+}
+.box small{color:#6b7280}
+.box strong{font-size:20px}
 
-.charts{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-.chart-box{height:280px}
+/* CHARTS */
+.charts{
+  display:grid;
+  grid-template-columns:2fr 1fr;
+  gap:20px;
+}
+.chart{
+  background:#fff;
+  padding:20px;
+  border-radius:14px;
+  box-shadow:0 6px 20px rgba(0,0,0,.08);
+}
+canvas{height:260px!important}
 
-/* AMORTIZATION */
-.amort-head{display:flex;justify-content:space-between;align-items:center}
-.toggle button{padding:10px 14px;border:none;border-radius:8px;font-weight:700;cursor:pointer}
-.toggle .active{background:var(--primary);color:#fff}
-.table-wrap{max-height:420px;overflow:auto;border:1px solid var(--border);border-radius:12px;margin-top:10px}
+/* MORE */
+.more-card{
+  background:#fff;
+  padding:24px;
+  border-radius:14px;
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
+}
+.table-wrap{
+  max-height:420px;
+  overflow:auto;
+  margin-top:16px;
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+}
 table{width:100%;border-collapse:collapse}
-th{background:var(--primary);color:#fff;position:sticky;top:0}
-th,td{padding:12px;border-bottom:1px solid var(--border);text-align:right}
-th:first-child,td:first-child{text-align:left}
+th{
+  background:#2c5aa0;
+  color:#fff;
+  padding:12px;
+  position:sticky;
+  top:0;
+}
+td{padding:12px;border-bottom:1px solid #e5e7eb;text-align:right}
+td:first-child{text-align:left}
 
-@media(max-width:900px){.charts{grid-template-columns:1fr}}
+/* RESPONSIVE */
+@media(max-width:1000px){
+  .breakdown{grid-template-columns:repeat(2,1fr)}
+  .charts{grid-template-columns:1fr}
+}
 </style>
 </head>
 
@@ -116,83 +164,81 @@ th:first-child,td:first-child{text-align:left}
 <div class="container">
 
 <div class="header">
-  <h1>Mortgage Calculator</h1>
-  <p>The above tool estimates monthly mortgage payments with taxes, insurance, PMI, HOA fees & more.</p>
+<h1>Mortgage Calculator</h1>
+<p>The above tool estimates monthly mortgage payments with taxes, insurance, PMI, HOA fees & more.</p>
 </div>
 
 <div class="tabs">
-  <button class="tab active" onclick="tab(0)">Define</button>
-  <button class="tab" onclick="tab(1)">Calculate</button>
-  <button class="tab" onclick="tab(2)">More</button>
+<button class="tab active" onclick="show(0)">Define</button>
+<button class="tab" onclick="show(1)">Calculate</button>
+<button class="tab" onclick="show(2)">More</button>
 </div>
 
 <!-- DEFINE -->
 <div class="panel active">
-<div class="card">
+<div class="define-grid">
 
 <div class="input">
-<label class="label">Currency</label>
-<select id="currency">
-<option value="USD">$ USD</option>
-</select>
+<label>Currency</label>
+<select><option>USD - US Dollar $</option></select>
 </div>
 
 <div class="input">
-<label class="label">Start Date</label>
-<input type="date" id="startDate" value="2025-12-01">
+<label>Start Date</label>
+<input type="date" id="start" value="2025-12-01">
 </div>
 
 <div class="input">
-<label class="label">Home Value</label>
+<label>Home Value</label>
 <input type="range" id="home" min="50000" max="2000000" step="5000" value="400000">
-<div class="range-val" id="homeV">$400,000</div>
+<div class="value" id="homeV">$400,000</div>
 </div>
 
 <div class="input">
-<label class="label">Down Payment %</label>
+<label>Down Payment %</label>
 <input type="range" id="down" min="0" max="50" step="0.5" value="20">
-<div class="range-val" id="downV">20%</div>
+<div class="value" id="downV">20%</div>
 </div>
 
 <div class="input">
-<label class="label">Loan Term (years)</label>
+<label>Loan Term (years)</label>
 <input type="range" id="years" min="5" max="40" value="30">
-<div class="range-val" id="yearsV">30 years</div>
+<div class="value" id="yearsV">30 years</div>
 </div>
 
 <div class="input">
-<label class="label">Interest Rate %</label>
+<label>Interest Rate %</label>
 <input type="range" id="rate" min="1" max="15" step="0.125" value="6.5">
-<div class="range-val" id="rateV">6.5%</div>
+<div class="value" id="rateV">6.5%</div>
 </div>
 
 <div class="input">
-<label class="label">Property Tax %</label>
+<label>Property Tax %</label>
 <input type="range" id="tax" min="0" max="5" step="0.1" value="1.2">
-<div class="range-val" id="taxV">1.2%</div>
+<div class="value" id="taxV">1.2%</div>
 </div>
 
 <div class="input">
-<label class="label">PMI Rate %</label>
+<label>PMI Rate %</label>
 <input type="range" id="pmi" min="0" max="2" step="0.1" value="0.5">
-<div class="range-val" id="pmiV">0.5%</div>
+<div class="value" id="pmiV">0.5%</div>
 </div>
 
 <div class="input">
-<label class="label">Home Insurance (annual)</label>
+<label>Home Insurance (annual)</label>
 <input type="range" id="ins" min="0" max="5000" step="100" value="1200">
-<div class="range-val" id="insV">$1,200</div>
+<div class="value" id="insV">$1,200</div>
 </div>
 
 <div class="input">
-<label class="label">HOA Fees (monthly)</label>
+<label>HOA Fees (monthly)</label>
 <input type="range" id="hoa" min="0" max="1000" step="25" value="0">
-<div class="range-val" id="hoaV">$0</div>
+<div class="value" id="hoaV">$0</div>
 </div>
 
-<div class="btn-row">
-<button class="btn primary" onclick="calc()">Calculate Payment</button>
-<button class="btn ghost" onclick="location.reload()">Reset</button>
+<div class="actions">
+<button class="main" onclick="calculate()">Calculate Payment</button>
+<button class="reset" onclick="location.reload()">Reset</button>
 </div>
 
 </div>
@@ -201,28 +247,23 @@ th:first-child,td:first-child{text-align:left}
 <!-- CALCULATE -->
 <div class="panel">
 <div class="hero">
-<div class="amount" id="monthly">$0</div>
+<h2 id="monthly">$0</h2>
 Monthly Payment
 </div>
 
 <div class="breakdown" id="breakdown"></div>
 
 <div class="charts">
-<div class="card chart-box"><canvas id="line"></canvas></div>
-<div class="card chart-box"><canvas id="donut"></canvas></div>
+<div class="chart"><canvas id="line"></canvas></div>
+<div class="chart"><canvas id="pie"></canvas></div>
 </div>
 </div>
 
 <!-- MORE -->
 <div class="panel">
-<div class="card">
-<div class="amort-head">
-<h3>Amortization Tables</h3>
-<div class="toggle">
-<button class="active" onclick="modeSet('year')">Yearly</button>
-<button onclick="modeSet('month')">Monthly</button>
-</div>
-</div>
+<div class="more-card">
+<h2>Amortization Tables</h2>
+
 <div class="table-wrap">
 <table>
 <thead>
@@ -232,37 +273,29 @@ Monthly Payment
 </table>
 </div>
 
-<div class="btn-row">
-<button class="btn primary" onclick="window.print()">🖨 Printer Friendly</button>
-<button class="btn ghost">📤 Share Calculation</button>
-</div>
-
 </div>
 </div>
 
 </div>
 
 <script>
-let amort=[],view='year',lineC,donutC;
 const f=n=>"$"+Math.round(n).toLocaleString();
-function tab(i){
-document.querySelectorAll('.tab').forEach((t,x)=>t.classList.toggle('active',x===i));
-document.querySelectorAll('.panel').forEach((p,x)=>p.classList.toggle('active',x===i));
-}
-function bind(id,fmt){
-const el=document.getElementById(id),v=document.getElementById(id+'V');
-el.oninput=()=>v.textContent=fmt(el.value);
-}
-bind('home',v=>f(v));
-bind('down',v=>v+"%");
-bind('years',v=>v+" years");
-bind('rate',v=>v+"%");
-bind('tax',v=>v+"%");
-bind('pmi',v=>v+"%");
-bind('ins',v=>f(v));
-bind('hoa',v=>f(v));
+let amort=[],lineChart,pieChart;
 
-function calc(){
+["home","down","years","rate","tax","pmi","ins","hoa"].forEach(id=>{
+document.getElementById(id).oninput=e=>{
+document.getElementById(id+"V").textContent=
+id==="home"||id==="ins"||id==="hoa"?f(e.target.value):
+id==="years"?e.target.value+" years":e.target.value+"%";
+};
+});
+
+function show(i){
+document.querySelectorAll(".tab").forEach((t,x)=>t.classList.toggle("active",x===i));
+document.querySelectorAll(".panel").forEach((p,x)=>p.classList.toggle("active",x===i));
+}
+
+function calculate(){
 const home=+home.value;
 const loan=home*(1-down.value/100);
 const r=rate.value/100/12;
@@ -273,67 +306,57 @@ const pmiM=loan/home>0.8?loan*(pmi.value/100)/12:0;
 const insM=ins.value/12;
 const hoaM=+hoa.value;
 const total=pi+taxM+pmiM+insM+hoaM;
+
 monthly.textContent=f(total);
 
 breakdown.innerHTML=`
-<div class="break"><small>Principal & Interest</small><b>${f(pi)}</b></div>
-<div class="break"><small>Property Tax</small><b>${f(taxM)}</b></div>
-<div class="break"><small>PMI</small><b>${f(pmiM)}</b></div>
-<div class="break"><small>Insurance</small><b>${f(insM)}</b></div>
-<div class="break"><small>HOA</small><b>${f(hoaM)}</b></div>`;
+<div class="box"><small>P&I</small><strong>${f(pi)}</strong></div>
+<div class="box"><small>Property Tax</small><strong>${f(taxM)}</strong></div>
+<div class="box"><small>PMI</small><strong>${f(pmiM)}</strong></div>
+<div class="box"><small>Insurance</small><strong>${f(insM)}</strong></div>
+<div class="box"><small>HOA</small><strong>${f(hoaM)}</strong></div>`;
 
-amort=[];
-let bal=loan;
+amort=[];let bal=loan;
 for(let i=1;i<=n;i++){
-const interest=bal*r;
-const principal=pi-interest;
+let interest=bal*r;
+let principal=pi-interest;
 bal-=principal;
 amort.push({i,principal,interest,balance:Math.max(bal,0)});
 }
+
 drawCharts(pi,taxM,pmiM,insM,hoaM);
-render();
-tab(1);
+renderTable();
+show(1);
 }
 
 function drawCharts(pi,tax,pmi,ins,hoa){
-lineC?.destroy();donutC?.destroy();
-lineC=new Chart(line,{
-type:'line',
-data:{labels:amort.filter((_,i)=>i%12==0).map((_,i)=>"Year "+i),
-datasets:[{data:amort.filter((_,i)=>i%12==0).map(x=>x.balance),borderColor:'#2c5aa0',fill:true}]}
+lineChart?.destroy();pieChart?.destroy();
+
+lineChart=new Chart(line,{
+type:"line",
+data:{
+labels:amort.filter((_,i)=>i%12===0).map((_,i)=>"Year "+i),
+datasets:[{data:amort.filter((_,i)=>i%12===0).map(x=>x.balance),borderColor:"#2c5aa0",fill:true}]
+}
 });
-donutC=new Chart(donut,{
-type:'doughnut',
-data:{labels:['P&I','Tax','PMI','Insurance','HOA'],
-datasets:[{data:[pi,tax,pmi,ins,hoa]}]},
-options:{plugins:{legend:{position:'bottom'}}}
+
+pieChart=new Chart(pie,{
+type:"doughnut",
+data:{
+labels:["P&I","Tax","PMI","Insurance","HOA"],
+datasets:[{data:[pi,tax,pmi,ins,hoa],backgroundColor:["#2c5aa0","#22c55e","#f59e0b","#06b6d4","#6b7280"]}]
+}
 });
 }
 
-function modeSet(m){
-view=m;
-document.querySelectorAll('.toggle button').forEach(b=>b.classList.remove('active'));
-event.target.classList.add('active');
-render();
+function renderTable(){
+table.innerHTML="";
+amort.forEach((x,i)=>{
+if(i<360){
+table.innerHTML+=`<tr><td>Month ${i+1}</td><td>${f(x.principal)}</td><td>${f(x.interest)}</td><td>${f(x.balance)}</td></tr>`;
 }
-
-function render(){
-table.innerHTML='';
-if(view==='year'){
-let p=0,i=0;
-amort.forEach((x,idx)=>{
-p+=x.principal;i+=x.interest;
-if((idx+1)%12===0){
-table.innerHTML+=`<tr><td>Year ${(idx+1)/12}</td><td>${f(p)}</td><td>${f(i)}</td><td>${f(x.balance)}</td></tr>`;
-p=i=0;
-}});
-}else{
-amort.forEach(x=>{
-table.innerHTML+=`<tr><td>Month ${x.i}</td><td>${f(x.principal)}</td><td>${f(x.interest)}</td><td>${f(x.balance)}</td></tr>`;
 });
 }
-}
-calc();
 </script>
 </body>
 </html>
