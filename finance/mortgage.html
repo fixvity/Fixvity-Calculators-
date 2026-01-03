@@ -2,19 +2,18 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mortgage Calculator</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 :root{
-  --bg:#f6fafc;
+  --bg:#f6fbff;
   --card:#ffffff;
   --primary:#1f6fb6;
-  --text:#111;
-  --muted:#6b7280;
   --border:#e6eef6;
+  --muted:#6b7280;
   --radius:14px;
   --shadow:0 10px 30px rgba(0,0,0,.06);
 }
@@ -22,327 +21,336 @@
 *{box-sizing:border-box}
 body{
   margin:0;
-  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;
+  font-family:Inter,system-ui,Arial;
   background:var(--bg);
-  color:var(--text);
+  color:#111;
 }
 
 .container{
   max-width:1200px;
-  margin:24px auto;
+  margin:auto;
   padding:16px;
 }
 
 h1{
-  margin:0 0 6px;
+  margin:0;
   color:var(--primary);
 }
 
-.subtitle{
+.sub{
   color:var(--muted);
   font-size:14px;
-  margin-bottom:18px;
+  margin-bottom:16px;
 }
 
-/* ===== SUMMARY BAR ===== */
-.summary-bar{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:12px;
-  margin-bottom:18px;
-}
-
-.summary{
-  background:var(--card);
-  border-radius:var(--radius);
-  box-shadow:var(--shadow);
-  padding:14px;
-  text-align:center;
-}
-
-.summary span{
-  display:block;
-  font-size:13px;
-  color:var(--muted);
-}
-
-.summary strong{
-  font-size:22px;
-  color:var(--primary);
-}
-
-/* ===== MAIN GRID ===== */
-.main{
+.grid{
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:18px;
+  gap:22px;
 }
 
-/* ===== CARDS ===== */
 .card{
   background:var(--card);
   border-radius:var(--radius);
   box-shadow:var(--shadow);
-  padding:16px;
-  min-height:100%;
+  padding:20px;
 }
 
-.section-title{
-  font-weight:700;
-  margin:16px 0 8px;
+.section{
+  margin-bottom:22px;
 }
 
-/* ===== FORM ===== */
+.section h3{
+  margin:0 0 12px;
+  font-size:15px;
+  color:var(--primary);
+}
+
+.form-group{
+  margin-bottom:14px;
+}
+
 label{
+  display:block;
   font-size:13px;
   color:var(--muted);
+  margin-bottom:6px;
 }
 
 input,select{
   width:100%;
-  padding:11px;
+  padding:12px;
   border-radius:10px;
   border:1px solid var(--border);
   font-size:15px;
 }
 
-.grid-2{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-}
-
-.grid-3{
-  display:grid;
-  grid-template-columns:1fr 1fr 1fr;
-  gap:10px;
-}
-
-.buttons{
+.row{
   display:flex;
-  gap:10px;
-  margin-top:14px;
+  gap:12px;
+}
+
+.row > div{flex:1}
+
+hr{
+  border:none;
+  border-top:1px solid var(--border);
+  margin:20px 0;
 }
 
 button{
-  border:none;
+  padding:12px 16px;
   border-radius:10px;
-  padding:10px 16px;
+  border:none;
   font-weight:600;
   cursor:pointer;
 }
 
-.primary{
-  background:var(--primary);
-  color:white;
+.primary{background:var(--primary);color:#fff}
+.ghost{background:#eef6fb;color:var(--primary)}
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:14px;
 }
 
-.secondary{
-  background:#eef5fb;
-  color:var(--primary);
+.stat{
+  background:#f8fbff;
+  border-radius:12px;
+  padding:14px;
 }
 
-/* ===== CHART ===== */
+.stat small{
+  color:var(--muted);
+  font-size:12px;
+}
+
+.stat b{
+  font-size:20px;
+  display:block;
+  margin-top:4px;
+}
+
 .chart-box{
   height:260px;
-  margin-top:10px;
+  margin-top:12px;
 }
 
-/* ===== AMORTIZATION ===== */
-.amortization{
-  margin-top:18px;
-}
-
-.toggle{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-
-.toggle button{
-  background:none;
-  color:var(--primary);
+.table-wrap{
+  max-height:420px;
+  overflow:auto;
+  border:1px solid var(--border);
+  border-radius:12px;
+  margin-top:12px;
 }
 
 table{
   width:100%;
   border-collapse:collapse;
-  margin-top:10px;
+  font-size:14px;
 }
 
 th,td{
   padding:10px;
   border-bottom:1px solid var(--border);
-  font-size:14px;
+  text-align:right;
 }
 
-th{
-  background:#f1f7fc;
-  text-align:left;
+th:first-child,td:first-child{text-align:center}
+
+thead{
+  background:#1f6fb6;
+  color:#fff;
+  position:sticky;
+  top:0;
 }
 
 @media(max-width:900px){
-  .main{grid-template-columns:1fr}
-  .summary-bar{grid-template-columns:1fr 1fr}
+  .grid{grid-template-columns:1fr}
 }
 </style>
 </head>
 
 <body>
 <div class="container">
+  <h1>Mortgage Calculator</h1>
+  <div class="sub">Monthly payment, amortization, charts & printable results</div>
 
-<h1>Mortgage Calculator</h1>
-<div class="subtitle">Monthly payment, amortization & chart</div>
+  <div class="grid">
 
-<!-- SUMMARY -->
-<div class="summary-bar">
-  <div class="summary"><span>Monthly Payment</span><strong id="monthly">$0</strong></div>
-  <div class="summary"><span>Total Interest</span><strong id="interest">$0</strong></div>
-  <div class="summary"><span>Total Paid</span><strong id="total">$0</strong></div>
-  <div class="summary"><span>Payoff Time</span><strong id="payoff">—</strong></div>
-</div>
+    <!-- LEFT -->
+    <div class="card">
 
-<div class="main">
+      <div class="section">
+        <h3>Currency</h3>
+        <select id="currency">
+          <option value="USD">USD ($)</option>
+          <option value="EUR">EUR (€)</option>
+          <option value="GBP">GBP (£)</option>
+        </select>
+      </div>
 
-<!-- INPUTS -->
-<div class="card">
-  <div class="grid-2">
-    <div>
-      <label>Home Price</label>
-      <input id="price" type="number" value="400000">
+      <div class="section">
+        <h3>Loan Details</h3>
+
+        <div class="form-group">
+          <label>Home Price</label>
+          <input id="price" value="400000" type="number">
+        </div>
+
+        <div class="row">
+          <div class="form-group">
+            <label>Down Payment (%)</label>
+            <input id="down" value="20" type="number">
+          </div>
+          <div class="form-group">
+            <label>Loan Term (years)</label>
+            <input id="years" value="30" type="number">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Interest Rate (%)</label>
+          <input id="rate" value="6.228" type="number" step="0.001">
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="section">
+        <h3>Taxes & Insurance</h3>
+
+        <div class="row">
+          <div class="form-group">
+            <label>Property Tax (% / yr)</label>
+            <input id="tax" value="1.2" type="number">
+          </div>
+          <div class="form-group">
+            <label>Insurance (annual)</label>
+            <input id="insurance" value="1500" type="number">
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="form-group">
+            <label>PMI (annual)</label>
+            <input id="pmi" value="0" type="number">
+          </div>
+          <div class="form-group">
+            <label>HOA (annual)</label>
+            <input id="hoa" value="0" type="number">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Other Costs (annual)</label>
+          <input id="other" value="4000" type="number">
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="section">
+        <h3>Extra Payments</h3>
+
+        <div class="form-group">
+          <label>Extra Monthly</label>
+          <input id="extra" value="0" type="number">
+        </div>
+      </div>
+
+      <button class="primary" onclick="calc()">Calculate</button>
+      <button class="ghost" onclick="location.reload()">Reset</button>
     </div>
-    <div>
-      <label>Down Payment (%)</label>
-      <input id="down" type="number" value="20">
+
+    <!-- RIGHT -->
+    <div class="card">
+
+      <div class="stats">
+        <div class="stat">
+          <small>Monthly Payment</small>
+          <b id="mp">$0</b>
+        </div>
+        <div class="stat">
+          <small>Total Interest</small>
+          <b id="ti">$0</b>
+        </div>
+      </div>
+
+      <div class="chart-box">
+        <canvas id="chart"></canvas>
+      </div>
+
+      <h3>Amortization Schedule</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Payment</th>
+              <th>Interest</th>
+              <th>Balance</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+
     </div>
+
   </div>
-
-  <div class="grid-2">
-    <div>
-      <label>Loan Term (years)</label>
-      <input id="years" type="number" value="30">
-    </div>
-    <div>
-      <label>Interest Rate (%)</label>
-      <input id="rate" type="number" value="6.228" step="0.001">
-    </div>
-  </div>
-
-  <div class="section-title">Taxes & Costs</div>
-  <div class="grid-2">
-    <div>
-      <label>Property Tax (% / yr)</label>
-      <input id="tax" type="number" value="1.2">
-    </div>
-    <div>
-      <label>Insurance (annual)</label>
-      <input id="insurance" type="number" value="1500">
-    </div>
-  </div>
-
-  <div class="grid-2">
-    <div>
-      <label>PMI (annual)</label>
-      <input id="pmi" type="number" value="0">
-    </div>
-    <div>
-      <label>HOA (annual)</label>
-      <input id="hoa" type="number" value="0">
-    </div>
-  </div>
-
-  <div class="section-title">Extra Payments</div>
-  <div class="grid-3">
-    <div>
-      <label>Monthly</label>
-      <input id="extraM" type="number" value="0">
-    </div>
-    <div>
-      <label>Yearly</label>
-      <input id="extraY" type="number" value="0">
-    </div>
-    <div>
-      <label>One-Time</label>
-      <input id="extraO" type="number" value="0">
-    </div>
-  </div>
-
-  <div class="buttons">
-    <button class="primary" onclick="calculate()">Calculate</button>
-    <button class="secondary" onclick="location.reload()">Reset</button>
-  </div>
-</div>
-
-<!-- RESULTS -->
-<div class="card">
-  <div class="chart-box">
-    <canvas id="chart"></canvas>
-  </div>
-
-  <div class="amortization">
-    <div class="toggle">
-      <strong>Amortization Schedule</strong>
-      <button onclick="toggleTable()">Show / Hide</button>
-    </div>
-    <div id="tableWrap" style="display:none">
-      <table id="table"></table>
-    </div>
-  </div>
-</div>
-
-</div>
 </div>
 
 <script>
 let chart;
 
-function calculate(){
-  const price=+price.value;
-  const downPct=+down.value/100;
-  const loan=price*(1-downPct);
-  const yearsN=+years.value;
-  const rateN=+rate.value/100/12;
-  const n=yearsN*12;
+function fmt(n){
+  return new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(n);
+}
 
-  const base=loan*(rateN/(1-Math.pow(1+rateN,-n)));
-  const extraM=+extraM.value;
+function calc(){
+  let P = price.value * (1 - down.value/100);
+  let r = rate.value/100/12;
+  let n = years.value*12;
 
-  let balance=loan,totalI=0;
-  let rows=[];
-  let balances=[];
+  let m = P * (r / (1 - Math.pow(1+r,-n)));
+  mp.textContent = fmt(m);
+
+  let bal = P, tiSum=0, rows="", data=[];
 
   for(let i=1;i<=n;i++){
-    let interest=balance*rateN;
-    let principal=base-interest+extraM;
-    if(principal>balance)principal=balance;
-    balance-=principal;
-    totalI+=interest;
-    balances.push(balance);
-    rows.push(`<tr><td>${i}</td><td>$${(base+extraM).toFixed(2)}</td><td>$${interest.toFixed(2)}</td><td>$${balance.toFixed(2)}</td></tr>`);
-    if(balance<=0)break;
+    let interest = bal*r;
+    let principal = m - interest;
+    bal -= principal;
+    tiSum += interest;
+
+    if(i<=36){
+      rows += `<tr>
+        <td>${i}</td>
+        <td>${fmt(m)}</td>
+        <td>${fmt(interest)}</td>
+        <td>${fmt(Math.max(0,bal))}</td>
+      </tr>`;
+    }
+    data.push(bal);
   }
 
-  monthly.textContent="$"+(base+extraM).toFixed(2);
-  interest.textContent="$"+totalI.toFixed(2);
-  total.textContent="$"+(loan+totalI).toFixed(2);
-  payoff.textContent=Math.ceil(rows.length/12)+" yrs";
+  ti.textContent = fmt(tiSum);
+  document.getElementById("rows").innerHTML = rows;
 
-  table.innerHTML="<tr><th>Month</th><th>Payment</th><th>Interest</th><th>Balance</th></tr>"+rows.join("");
-
-  if(chart)chart.destroy();
-  chart=new Chart(chart.getContext("2d"),{
+  chart?.destroy();
+  chart = new Chart(chartCanvas,{
     type:"line",
-    data:{labels:balances.map((_,i)=>i+1),datasets:[{data:balances,label:"Balance",borderColor:"#1f6fb6",fill:true,backgroundColor:"rgba(31,111,182,.1)"}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
+    data:{
+      labels:data.map((_,i)=>i+1),
+      datasets:[{data, borderColor:"#1f6fb6", fill:true}]
+    },
+    options:{responsive:true,maintainAspectRatio:false}
   });
 }
-
-function toggleTable(){
-  tableWrap.style.display=tableWrap.style.display==="none"?"block":"none";
-}
-
-calculate();
+calc();
 </script>
-
 </body>
 </html>
