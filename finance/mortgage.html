@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>Mortgage Calculator</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -76,7 +75,7 @@ body{
 }
 .field{margin-bottom:14px}
 label{font-weight:600}
-input,select{
+input{
   width:100%;
   padding:12px;
   margin-top:6px;
@@ -85,15 +84,27 @@ input,select{
   font-size:15px;
 }
 
-/* BUTTON */
+/* BUTTONS */
+.actions{
+  display:grid;
+  grid-template-columns:2fr 1fr;
+  gap:12px;
+}
 button.primary{
-  width:100%;
-  margin-top:12px;
   padding:14px;
   font-size:16px;
   font-weight:700;
   background:var(--primary);
   color:#fff;
+  border:none;
+  border-radius:12px;
+  cursor:pointer;
+}
+button.clear{
+  padding:14px;
+  font-size:15px;
+  font-weight:700;
+  background:#e5e7eb;
   border:none;
   border-radius:12px;
   cursor:pointer;
@@ -112,7 +123,7 @@ button.primary{
 /* BREAKDOWN */
 .breakdown{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
   gap:14px;
   margin:20px 0;
 }
@@ -121,6 +132,7 @@ button.primary{
   padding:14px;
   border-radius:12px;
   box-shadow:var(--shadow);
+  text-align:center;
 }
 .stat small{color:var(--muted)}
 .stat strong{
@@ -167,35 +179,31 @@ button.primary{
 }
 
 .table-wrap{
-  overflow:auto;
   max-height:420px;
+  overflow:auto;
   border:1px solid #e5e7eb;
   border-radius:12px;
 }
 table{
   width:100%;
-  border-collapse:collapse;
   min-width:650px;
+  border-collapse:collapse;
+}
+th,td{
+  padding:12px;
+  border-bottom:1px solid #e5e7eb;
+  text-align:center;
+  vertical-align:middle;
 }
 th{
   background:var(--primary);
   color:#fff;
-  padding:10px;
   position:sticky;
   top:0;
 }
-td{
-  padding:10px;
-  border-bottom:1px solid #e5e7eb;
-  text-align:right;
-}
-td:first-child{text-align:left}
 
-/* DESKTOP */
 @media(min-width:900px){
-  .charts{
-    grid-template-columns:2fr 1fr;
-  }
+  .charts{grid-template-columns:2fr 1fr}
 }
 </style>
 </head>
@@ -224,8 +232,13 @@ td:first-child{text-align:left}
 <div class="field"><label>Loan Term (Years)</label><input id="years" value="30"></div>
 <div class="field"><label>Property Tax (Monthly)</label><input id="tax" value="250"></div>
 <div class="field"><label>Insurance (Monthly)</label><input id="ins" value="120"></div>
+<div class="field"><label>PMI Rate (% Annual)</label><input id="pmi" value="0.5"></div>
+<div class="field"><label>HOA (Monthly)</label><input id="hoa" value="0"></div>
 
+<div class="actions">
 <button class="primary" onclick="calculate()">Calculate Mortgage</button>
+<button class="clear" onclick="clearAll()">Clear</button>
+</div>
 
 </div>
 </div>
@@ -258,7 +271,12 @@ Monthly Payment
 <div class="table-wrap">
 <table>
 <thead>
-<tr><th>Period</th><th>Principal</th><th>Interest</th><th>Balance</th></tr>
+<tr>
+<th>Period</th>
+<th>Principal</th>
+<th>Interest</th>
+<th>Balance</th>
+</tr>
 </thead>
 <tbody id="table"></tbody>
 </table>
@@ -271,8 +289,6 @@ Monthly Payment
 
 <script>
 let amort=[],view="monthly",line,pie;
-
-const $=id=>document.getElementById(id);
 const fmt=n=>"$"+Math.round(n).toLocaleString();
 
 function showTab(i){
@@ -282,21 +298,27 @@ document.querySelectorAll(".panel").forEach((p,x)=>p.classList.toggle("active",x
 
 function calculate(){
 const price=+home.value;
-const loan=price-down.value;
+const downPay=+down.value;
+const loan=price-downPay;
 const r=rate.value/100/12;
 const n=years.value*12;
 
 const pi=loan*r/(1-Math.pow(1+r,-n));
 const taxM=+tax.value;
 const insM=+ins.value;
-const total=pi+taxM+insM;
+const hoaM=+hoa.value;
+const ltv=loan/price;
+const pmiM=ltv>0.8 ? loan*(pmi.value/100)/12 : 0;
 
+const total=pi+taxM+insM+hoaM+pmiM;
 monthly.textContent=fmt(total);
 
 breakdown.innerHTML=`
 <div class="stat"><small>P&I</small><strong>${fmt(pi)}</strong></div>
 <div class="stat"><small>Tax</small><strong>${fmt(taxM)}</strong></div>
 <div class="stat"><small>Insurance</small><strong>${fmt(insM)}</strong></div>
+<div class="stat"><small>PMI</small><strong>${fmt(pmiM)}</strong></div>
+<div class="stat"><small>HOA</small><strong>${fmt(hoaM)}</strong></div>
 `;
 
 amort=[];
@@ -308,28 +330,35 @@ bal-=principal;
 amort.push({i,principal,interest,balance:Math.max(bal,0)});
 }
 
-drawCharts();
+drawCharts(pi,taxM,insM,pmiM,hoaM);
 renderTable();
 showTab(1);
 }
 
-function drawCharts(){
-line?.destroy();
-pie?.destroy();
+function drawCharts(pi,tax,ins,pmi,hoa){
+line?.destroy(); pie?.destroy();
 
 line=new Chart(lineChart,{
 type:"line",
 data:{
 labels:amort.filter((_,i)=>i%12===0).map((_,i)=>`Year ${i+1}`),
-datasets:[{data:amort.filter((_,i)=>i%12===0).map(x=>x.balance),borderColor:"#2563eb",fill:true}]
+datasets:[{
+label:"Remaining Balance",
+data:amort.filter((_,i)=>i%12===0).map(x=>x.balance),
+borderColor:"#2563eb",
+fill:true
+}]
 }
 });
 
 pie=new Chart(pieChart,{
 type:"doughnut",
 data:{
-labels:["Principal & Interest","Tax","Insurance"],
-datasets:[{data:[1,1,1],backgroundColor:["#2563eb","#16a34a","#0ea5e9"]}]
+labels:["P&I","Tax","Insurance","PMI","HOA"],
+datasets:[{
+data:[pi,tax,ins,pmi,hoa],
+backgroundColor:["#2563eb","#16a34a","#0ea5e9","#f59e0b","#6b7280"]
+}]
 }
 });
 }
@@ -345,18 +374,37 @@ function renderTable(){
 table.innerHTML="";
 if(view==="monthly"){
 amort.forEach(x=>{
-table.innerHTML+=`<tr><td>Month ${x.i}</td><td>${fmt(x.principal)}</td><td>${fmt(x.interest)}</td><td>${fmt(x.balance)}</td></tr>`;
+table.innerHTML+=`<tr>
+<td>Month ${x.i}</td>
+<td>${fmt(x.principal)}</td>
+<td>${fmt(x.interest)}</td>
+<td>${fmt(x.balance)}</td>
+</tr>`;
 });
 }else{
 let p=0,i=0,y=1;
 amort.forEach((x,idx)=>{
 p+=x.principal;i+=x.interest;
 if((idx+1)%12===0){
-table.innerHTML+=`<tr><td>Year ${y++}</td><td>${fmt(p)}</td><td>${fmt(i)}</td><td>${fmt(x.balance)}</td></tr>`;
+table.innerHTML+=`<tr>
+<td>Year ${y++}</td>
+<td>${fmt(p)}</td>
+<td>${fmt(i)}</td>
+<td>${fmt(x.balance)}</td>
+</tr>`;
 p=i=0;
 }
 });
 }
+}
+
+function clearAll(){
+document.querySelectorAll("input").forEach(i=>i.value="");
+monthly.textContent="$0";
+breakdown.innerHTML="";
+table.innerHTML="";
+line?.destroy(); pie?.destroy();
+showTab(0);
 }
 </script>
 
