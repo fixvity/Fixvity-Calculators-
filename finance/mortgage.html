@@ -7,64 +7,53 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<!-- Trust / SEO Schema -->
-<script type="application/ld+json">
-{
-  "@context":"https://schema.org",
-  "@type":"FinancialProduct",
-  "name":"Mortgage Calculator",
-  "category":"LoanCalculator",
-  "provider":{"@type":"Organization","name":"Trusted Finance Tools"}
-}
-</script>
-
 <style>
 :root{
-  --primary:#2c5aa0;
-  --bg:#f3f6fb;
+  --primary:#2563eb;
+  --bg:#f4f7fb;
   --card:#ffffff;
-  --text:#1f2937;
+  --text:#111827;
   --muted:#6b7280;
   --radius:14px;
-  --shadow:0 10px 30px rgba(0,0,0,.08);
+  --shadow:0 8px 28px rgba(0,0,0,.08);
 }
-
 *{box-sizing:border-box}
-
 body{
   margin:0;
   font-family:Inter,system-ui,Arial;
   background:var(--bg);
   color:var(--text);
 }
-
-.container{max-width:1200px;margin:auto;padding:18px}
+.container{
+  max-width:1100px;
+  margin:auto;
+  padding:16px;
+}
 
 /* HEADER */
 .header{
   background:var(--card);
-  padding:26px;
+  padding:22px;
   border-radius:var(--radius);
   box-shadow:var(--shadow);
   text-align:center;
 }
 .header h1{margin:0;color:var(--primary)}
-.header p{margin-top:8px;color:var(--muted)}
+.header p{margin-top:6px;color:var(--muted)}
 
 /* TABS */
 .tabs{
   display:flex;
-  margin-top:18px;
+  margin-top:16px;
   background:var(--card);
   border-radius:var(--radius);
   box-shadow:var(--shadow);
 }
 .tab{
   flex:1;
-  padding:16px;
+  padding:14px;
   border:none;
   background:none;
-  font-size:16px;
   font-weight:700;
   cursor:pointer;
   color:var(--muted);
@@ -75,103 +64,98 @@ body{
 }
 
 /* PANELS */
-.panel{display:none;margin-top:20px}
+.panel{display:none;margin-top:18px}
 .panel.active{display:block}
 
-/* CARD */
-.card{
+/* FORM */
+.form-card{
   background:var(--card);
-  padding:24px;
+  padding:20px;
   border-radius:var(--radius);
   box-shadow:var(--shadow);
 }
-
-/* INPUTS */
-.group{margin-bottom:18px}
+.field{margin-bottom:14px}
 label{font-weight:600}
-input,select{width:100%;margin-top:6px}
-.value{
-  text-align:center;
-  font-weight:700;
-  color:var(--primary);
-  margin-top:4px;
+input,select{
+  width:100%;
+  padding:12px;
+  margin-top:6px;
+  border-radius:10px;
+  border:1px solid #e5e7eb;
+  font-size:15px;
 }
 
-/* BUTTONS */
-.actions{display:flex;gap:14px;margin-top:20px}
-.main{
-  flex:2;
+/* BUTTON */
+button.primary{
+  width:100%;
+  margin-top:12px;
+  padding:14px;
+  font-size:16px;
+  font-weight:700;
   background:var(--primary);
   color:#fff;
   border:none;
-  padding:14px;
-  font-weight:700;
-  border-radius:10px;
-  cursor:pointer;
-}
-.reset{
-  flex:1;
-  background:#eef2f7;
-  border:none;
-  padding:14px;
-  font-weight:700;
-  border-radius:10px;
+  border-radius:12px;
   cursor:pointer;
 }
 
 /* HERO */
 .hero{
-  background:linear-gradient(135deg,#2c5aa0,#1e3a8a);
+  background:linear-gradient(135deg,#2563eb,#1e40af);
   color:#fff;
-  padding:36px;
+  padding:32px;
   border-radius:18px;
   text-align:center;
 }
-.hero h2{font-size:52px;margin:0}
+.hero h2{font-size:44px;margin:0}
 
 /* BREAKDOWN */
 .breakdown{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-  gap:16px;
-  margin:24px 0;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:14px;
+  margin:20px 0;
 }
-.box{
-  background:#fff;
-  padding:18px;
+.stat{
+  background:var(--card);
+  padding:14px;
   border-radius:12px;
   box-shadow:var(--shadow);
 }
-.box small{color:var(--muted)}
-.box strong{
-  font-size:22px;
+.stat small{color:var(--muted)}
+.stat strong{
   display:block;
-  margin-top:6px;
-  font-variant-numeric:tabular-nums;
+  font-size:20px;
+  margin-top:4px;
 }
 
 /* CHARTS */
 .charts{
   display:grid;
-  grid-template-columns:2fr 1fr;
-  gap:20px;
+  grid-template-columns:1fr;
+  gap:18px;
 }
 .chart{
-  background:#fff;
-  padding:20px;
+  background:var(--card);
+  padding:16px;
   border-radius:var(--radius);
   box-shadow:var(--shadow);
 }
-canvas{height:260px!important}
 
-/* TOGGLE */
+/* AMORTIZATION */
+.table-card{
+  background:var(--card);
+  padding:18px;
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+}
 .toggle{
   display:flex;
   gap:10px;
-  margin-bottom:12px;
+  margin-bottom:10px;
 }
 .toggle button{
-  padding:8px 16px;
+  padding:8px 14px;
   border-radius:8px;
   border:none;
   font-weight:700;
@@ -182,10 +166,9 @@ canvas{height:260px!important}
   color:#fff;
 }
 
-/* TABLE */
 .table-wrap{
-  max-height:420px;
   overflow:auto;
+  max-height:420px;
   border:1px solid #e5e7eb;
   border-radius:12px;
 }
@@ -197,33 +180,22 @@ table{
 th{
   background:var(--primary);
   color:#fff;
-  padding:12px;
+  padding:10px;
   position:sticky;
   top:0;
 }
 td{
-  padding:12px;
+  padding:10px;
   border-bottom:1px solid #e5e7eb;
   text-align:right;
-  font-variant-numeric:tabular-nums;
 }
-td:first-child,th:first-child{
-  text-align:left;
-  position:sticky;
-  left:0;
-  background:#fff;
-  z-index:2;
-}
-th:first-child{background:var(--primary);z-index:3}
+td:first-child{text-align:left}
 
-td.principal{color:#1e40af;font-weight:600}
-td.interest{color:#b45309}
-td.balance{font-weight:700}
-
-/* MOBILE */
-@media(max-width:900px){
-  .charts{grid-template-columns:1fr}
-  .hero h2{font-size:40px}
+/* DESKTOP */
+@media(min-width:900px){
+  .charts{
+    grid-template-columns:2fr 1fr;
+  }
 }
 </style>
 </head>
@@ -231,13 +203,11 @@ td.balance{font-weight:700}
 <body>
 <div class="container">
 
-<!-- HEADER -->
 <div class="header">
 <h1>Mortgage Calculator</h1>
 <p>Advanced mortgage calculator with charts, amortization & exports.</p>
 </div>
 
-<!-- TABS -->
 <div class="tabs">
 <button class="tab active" onclick="showTab(0)">Define</button>
 <button class="tab" onclick="showTab(1)">Calculate</button>
@@ -246,74 +216,16 @@ td.balance{font-weight:700}
 
 <!-- DEFINE -->
 <div class="panel active">
-<div class="card">
+<div class="form-card">
 
-<div class="group">
-<label>Currency</label>
-<select id="currency">
-<option value="$">$ USD</option>
-<option value="€">€ EUR</option>
-<option value="£">£ GBP</option>
-</select>
-</div>
+<div class="field"><label>Home Price</label><input id="home" value="400000"></div>
+<div class="field"><label>Down Payment</label><input id="down" value="30000"></div>
+<div class="field"><label>Interest Rate (%)</label><input id="rate" value="6.5"></div>
+<div class="field"><label>Loan Term (Years)</label><input id="years" value="30"></div>
+<div class="field"><label>Property Tax (Monthly)</label><input id="tax" value="250"></div>
+<div class="field"><label>Insurance (Monthly)</label><input id="ins" value="120"></div>
 
-<div class="group">
-<label>Start Date</label>
-<input type="date" id="start">
-</div>
-
-<div class="group">
-<label>Home Value</label>
-<input type="range" id="home" min="50000" max="2000000" step="5000" value="400000">
-<div class="value" id="homeV">$400,000</div>
-</div>
-
-<div class="group">
-<label>Down Payment %</label>
-<input type="range" id="down" min="0" max="50" step="0.5" value="20">
-<div class="value" id="downV">20%</div>
-</div>
-
-<div class="group">
-<label>Loan Term (years)</label>
-<input type="range" id="years" min="5" max="40" value="30">
-<div class="value" id="yearsV">30 years</div>
-</div>
-
-<div class="group">
-<label>Interest Rate %</label>
-<input type="range" id="rate" min="1" max="15" step="0.125" value="6.5">
-<div class="value" id="rateV">6.5%</div>
-</div>
-
-<div class="group">
-<label>Property Tax %</label>
-<input type="range" id="tax" min="0" max="5" step="0.1" value="1.2">
-<div class="value" id="taxV">1.2%</div>
-</div>
-
-<div class="group">
-<label>PMI %</label>
-<input type="range" id="pmi" min="0" max="2" step="0.1" value="0.5">
-<div class="value" id="pmiV">0.5%</div>
-</div>
-
-<div class="group">
-<label>Insurance (annual)</label>
-<input type="range" id="ins" min="0" max="5000" step="100" value="1200">
-<div class="value" id="insV">$1,200</div>
-</div>
-
-<div class="group">
-<label>HOA (monthly)</label>
-<input type="range" id="hoa" min="0" max="1000" step="25" value="0">
-<div class="value" id="hoaV">$0</div>
-</div>
-
-<div class="actions">
-<button class="main" onclick="calculate()">Calculate</button>
-<button class="reset" onclick="location.reload()">Reset</button>
-</div>
+<button class="primary" onclick="calculate()">Calculate Mortgage</button>
 
 </div>
 </div>
@@ -335,8 +247,7 @@ Monthly Payment
 
 <!-- MORE -->
 <div class="panel">
-<div class="card">
-
+<div class="table-card">
 <h2>Amortization Schedule</h2>
 
 <div class="toggle">
@@ -347,20 +258,10 @@ Monthly Payment
 <div class="table-wrap">
 <table>
 <thead>
-<tr>
-<th>Period</th>
-<th>Principal</th>
-<th>Interest</th>
-<th>Balance</th>
-</tr>
+<tr><th>Period</th><th>Principal</th><th>Interest</th><th>Balance</th></tr>
 </thead>
 <tbody id="table"></tbody>
 </table>
-</div>
-
-<div class="actions">
-<button class="main" onclick="window.print()">Printer Friendly</button>
-<button class="reset" onclick="exportCSV()">Export CSV</button>
 </div>
 
 </div>
@@ -369,92 +270,67 @@ Monthly Payment
 </div>
 
 <script>
-let amort=[],view="monthly",lineChart,pieChart;
+let amort=[],view="monthly",line,pie;
 
-const fmt=(n,s)=>s+Math.round(n).toLocaleString();
+const $=id=>document.getElementById(id);
+const fmt=n=>"$"+Math.round(n).toLocaleString();
 
 function showTab(i){
 document.querySelectorAll(".tab").forEach((t,x)=>t.classList.toggle("active",x===i));
 document.querySelectorAll(".panel").forEach((p,x)=>p.classList.toggle("active",x===i));
 }
 
-document.querySelectorAll("input[type=range]").forEach(el=>{
-el.oninput=()=>{
-const s=currency.value;
-const id=el.id;
-document.getElementById(id+"V").textContent=
-(id==="home"||id==="ins"||id==="hoa")?fmt(el.value,s):
-(id==="years")?el.value+" years":el.value+"%";
-};
-});
-
 function calculate(){
-const s=currency.value;
-const loan=home.value*(1-down.value/100);
+const price=+home.value;
+const loan=price-down.value;
 const r=rate.value/100/12;
 const n=years.value*12;
 
 const pi=loan*r/(1-Math.pow(1+r,-n));
-const taxM=home.value*(tax.value/100)/12;
-const pmiM=loan/home.value>0.8?loan*(pmi.value/100)/12:0;
-const insM=ins.value/12;
-const hoaM=+hoa.value;
-const total=pi+taxM+pmiM+insM+hoaM;
+const taxM=+tax.value;
+const insM=+ins.value;
+const total=pi+taxM+insM;
 
-monthly.textContent=fmt(total,s);
+monthly.textContent=fmt(total);
 
 breakdown.innerHTML=`
-<div class="box"><small>P&I</small><strong>${fmt(pi,s)}</strong></div>
-<div class="box"><small>Tax</small><strong>${fmt(taxM,s)}</strong></div>
-<div class="box"><small>PMI</small><strong>${fmt(pmiM,s)}</strong></div>
-<div class="box"><small>Insurance</small><strong>${fmt(insM,s)}</strong></div>
-<div class="box"><small>HOA</small><strong>${fmt(hoaM,s)}</strong></div>
+<div class="stat"><small>P&I</small><strong>${fmt(pi)}</strong></div>
+<div class="stat"><small>Tax</small><strong>${fmt(taxM)}</strong></div>
+<div class="stat"><small>Insurance</small><strong>${fmt(insM)}</strong></div>
 `;
 
 amort=[];
 let bal=loan;
 for(let i=1;i<=n;i++){
-const interest=bal*r;
-const principal=pi-interest;
+let interest=bal*r;
+let principal=pi-interest;
 bal-=principal;
 amort.push({i,principal,interest,balance:Math.max(bal,0)});
 }
 
-drawCharts(pi,taxM,pmiM,insM,hoaM);
+drawCharts();
 renderTable();
 showTab(1);
 }
 
-function drawCharts(pi,tax,pmi,ins,hoa){
-lineChart?.destroy();
-pieChart?.destroy();
+function drawCharts(){
+line?.destroy();
+pie?.destroy();
 
-lineChart=new Chart(lineChart,{
+line=new Chart(lineChart,{
 type:"line",
 data:{
 labels:amort.filter((_,i)=>i%12===0).map((_,i)=>`Year ${i+1}`),
-datasets:[{
-label:"Loan Balance",
-data:amort.filter((_,i)=>i%12===0).map(x=>x.balance),
-borderColor:"#2c5aa0",
-backgroundColor:"rgba(44,90,160,.15)",
-fill:true,
-tension:.35
-}]
-},
-options:{plugins:{legend:{display:false}}}
+datasets:[{data:amort.filter((_,i)=>i%12===0).map(x=>x.balance),borderColor:"#2563eb",fill:true}]
+}
 });
 
-pieChart=new Chart(pieChart,{
+pie=new Chart(pieChart,{
 type:"doughnut",
 data:{
-labels:["P&I","Tax","PMI","Insurance","HOA"],
-datasets:[{
-data:[pi,tax,pmi,ins,hoa],
-backgroundColor:["#1e40af","#16a34a","#f59e0b","#0ea5e9","#6b7280"]
-}]
-},
-options:{cutout:"65%",plugins:{legend:{position:"bottom"}}}
+labels:["Principal & Interest","Tax","Insurance"],
+datasets:[{data:[1,1,1],backgroundColor:["#2563eb","#16a34a","#0ea5e9"]}]
+}
 });
 }
 
@@ -467,46 +343,20 @@ renderTable();
 
 function renderTable(){
 table.innerHTML="";
-const s=currency.value;
-
 if(view==="monthly"){
 amort.forEach(x=>{
-table.innerHTML+=`
-<tr>
-<td>Month ${x.i}</td>
-<td class="principal">${fmt(x.principal,s)}</td>
-<td class="interest">${fmt(x.interest,s)}</td>
-<td class="balance">${fmt(x.balance,s)}</td>
-</tr>`;
+table.innerHTML+=`<tr><td>Month ${x.i}</td><td>${fmt(x.principal)}</td><td>${fmt(x.interest)}</td><td>${fmt(x.balance)}</td></tr>`;
 });
 }else{
 let p=0,i=0,y=1;
 amort.forEach((x,idx)=>{
 p+=x.principal;i+=x.interest;
 if((idx+1)%12===0){
-table.innerHTML+=`
-<tr>
-<td>Year ${y++}</td>
-<td class="principal">${fmt(p,s)}</td>
-<td class="interest">${fmt(i,s)}</td>
-<td class="balance">${fmt(x.balance,s)}</td>
-</tr>`;
+table.innerHTML+=`<tr><td>Year ${y++}</td><td>${fmt(p)}</td><td>${fmt(i)}</td><td>${fmt(x.balance)}</td></tr>`;
 p=i=0;
 }
 });
 }
-}
-
-function exportCSV(){
-let csv="Period,Principal,Interest,Balance\n";
-amort.forEach(x=>{
-csv+=`Month ${x.i},${x.principal},${x.interest},${x.balance}\n`;
-});
-const blob=new Blob([csv],{type:"text/csv"});
-const a=document.createElement("a");
-a.href=URL.createObjectURL(blob);
-a.download="mortgage_amortization.csv";
-a.click();
 }
 </script>
 
