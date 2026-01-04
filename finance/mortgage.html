@@ -4,9 +4,10 @@
 <meta charset="UTF-8">
 <title>Mortgage Calculator</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<!-- SEO Trust Schema -->
+<!-- Trust / SEO Schema -->
 <script type="application/ld+json">
 {
   "@context":"https://schema.org",
@@ -27,23 +28,30 @@
   --radius:14px;
   --shadow:0 10px 30px rgba(0,0,0,.08);
 }
+
 *{box-sizing:border-box}
+
 body{
   margin:0;
   font-family:Inter,system-ui,Arial;
   background:var(--bg);
   color:var(--text);
 }
+
 .container{max-width:1200px;margin:auto;padding:18px}
+
+/* HEADER */
 .header{
   background:var(--card);
-  padding:24px;
+  padding:26px;
   border-radius:var(--radius);
   box-shadow:var(--shadow);
   text-align:center;
 }
 .header h1{margin:0;color:var(--primary)}
 .header p{margin-top:8px;color:var(--muted)}
+
+/* TABS */
 .tabs{
   display:flex;
   margin-top:18px;
@@ -61,22 +69,57 @@ body{
   cursor:pointer;
   color:var(--muted);
 }
-.tab.active{background:var(--primary);color:#fff}
+.tab.active{
+  background:var(--primary);
+  color:#fff;
+}
+
+/* PANELS */
 .panel{display:none;margin-top:20px}
 .panel.active{display:block}
+
+/* CARD */
 .card{
   background:var(--card);
   padding:24px;
   border-radius:var(--radius);
   box-shadow:var(--shadow);
 }
+
+/* INPUTS */
 .group{margin-bottom:18px}
 label{font-weight:600}
 input,select{width:100%;margin-top:6px}
-.value{text-align:center;font-weight:700;color:var(--primary);margin-top:4px}
+.value{
+  text-align:center;
+  font-weight:700;
+  color:var(--primary);
+  margin-top:4px;
+}
+
+/* BUTTONS */
 .actions{display:flex;gap:14px;margin-top:20px}
-.main{flex:2;background:var(--primary);color:#fff;border:none;padding:14px;font-weight:700;border-radius:10px}
-.reset{flex:1;background:#eef2f7;border:none;padding:14px;font-weight:700;border-radius:10px}
+.main{
+  flex:2;
+  background:var(--primary);
+  color:#fff;
+  border:none;
+  padding:14px;
+  font-weight:700;
+  border-radius:10px;
+  cursor:pointer;
+}
+.reset{
+  flex:1;
+  background:#eef2f7;
+  border:none;
+  padding:14px;
+  font-weight:700;
+  border-radius:10px;
+  cursor:pointer;
+}
+
+/* HERO */
 .hero{
   background:linear-gradient(135deg,#2c5aa0,#1e3a8a);
   color:#fff;
@@ -85,35 +128,102 @@ input,select{width:100%;margin-top:6px}
   text-align:center;
 }
 .hero h2{font-size:52px;margin:0}
+
+/* BREAKDOWN */
 .breakdown{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
   gap:16px;
   margin:24px 0;
 }
-.box{background:#fff;padding:18px;border-radius:12px}
+.box{
+  background:#fff;
+  padding:18px;
+  border-radius:12px;
+  box-shadow:var(--shadow);
+}
 .box small{color:var(--muted)}
-.box strong{font-size:20px}
-.charts{display:grid;grid-template-columns:2fr 1fr;gap:20px}
-.chart{background:#fff;padding:20px;border-radius:var(--radius)}
+.box strong{
+  font-size:22px;
+  display:block;
+  margin-top:6px;
+  font-variant-numeric:tabular-nums;
+}
+
+/* CHARTS */
+.charts{
+  display:grid;
+  grid-template-columns:2fr 1fr;
+  gap:20px;
+}
+.chart{
+  background:#fff;
+  padding:20px;
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+}
 canvas{height:260px!important}
+
+/* TOGGLE */
 .toggle{
-  display:flex;gap:10px;margin-bottom:10px
+  display:flex;
+  gap:10px;
+  margin-bottom:12px;
 }
 .toggle button{
-  padding:8px 14px;border-radius:8px;border:none;
-  font-weight:700;cursor:pointer
+  padding:8px 16px;
+  border-radius:8px;
+  border:none;
+  font-weight:700;
+  cursor:pointer;
 }
-.toggle .active{background:var(--primary);color:#fff}
+.toggle .active{
+  background:var(--primary);
+  color:#fff;
+}
+
+/* TABLE */
 .table-wrap{
-  max-height:420px;overflow:auto;border:1px solid #e5e7eb;border-radius:12px
+  max-height:420px;
+  overflow:auto;
+  border:1px solid #e5e7eb;
+  border-radius:12px;
 }
-table{width:100%;border-collapse:collapse}
-th{background:var(--primary);color:#fff;padding:12px;position:sticky;top:0}
-td{padding:12px;border-bottom:1px solid #e5e7eb;text-align:right}
-td:first-child{text-align:left}
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:650px;
+}
+th{
+  background:var(--primary);
+  color:#fff;
+  padding:12px;
+  position:sticky;
+  top:0;
+}
+td{
+  padding:12px;
+  border-bottom:1px solid #e5e7eb;
+  text-align:right;
+  font-variant-numeric:tabular-nums;
+}
+td:first-child,th:first-child{
+  text-align:left;
+  position:sticky;
+  left:0;
+  background:#fff;
+  z-index:2;
+}
+th:first-child{background:var(--primary);z-index:3}
+
+td.principal{color:#1e40af;font-weight:600}
+td.interest{color:#b45309}
+td.balance{font-weight:700}
+
+/* MOBILE */
 @media(max-width:900px){
   .charts{grid-template-columns:1fr}
+  .hero h2{font-size:40px}
 }
 </style>
 </head>
@@ -121,11 +231,13 @@ td:first-child{text-align:left}
 <body>
 <div class="container">
 
+<!-- HEADER -->
 <div class="header">
 <h1>Mortgage Calculator</h1>
 <p>Advanced mortgage calculator with charts, amortization & exports.</p>
 </div>
 
+<!-- TABS -->
 <div class="tabs">
 <button class="tab active" onclick="showTab(0)">Define</button>
 <button class="tab" onclick="showTab(1)">Calculate</button>
@@ -135,47 +247,74 @@ td:first-child{text-align:left}
 <!-- DEFINE -->
 <div class="panel active">
 <div class="card">
-<div class="group"><label>Currency</label>
-<select id="currency"><option value="$">$ USD</option><option value="€">€ EUR</option><option value="£">£ GBP</option></select></div>
 
-<div class="group"><label>Start Date</label><input type="date" id="start"></div>
+<div class="group">
+<label>Currency</label>
+<select id="currency">
+<option value="$">$ USD</option>
+<option value="€">€ EUR</option>
+<option value="£">£ GBP</option>
+</select>
+</div>
 
-<div class="group"><label>Home Value</label>
+<div class="group">
+<label>Start Date</label>
+<input type="date" id="start">
+</div>
+
+<div class="group">
+<label>Home Value</label>
 <input type="range" id="home" min="50000" max="2000000" step="5000" value="400000">
-<div class="value" id="homeV">$400,000</div></div>
+<div class="value" id="homeV">$400,000</div>
+</div>
 
-<div class="group"><label>Down Payment %</label>
+<div class="group">
+<label>Down Payment %</label>
 <input type="range" id="down" min="0" max="50" step="0.5" value="20">
-<div class="value" id="downV">20%</div></div>
+<div class="value" id="downV">20%</div>
+</div>
 
-<div class="group"><label>Loan Term (years)</label>
+<div class="group">
+<label>Loan Term (years)</label>
 <input type="range" id="years" min="5" max="40" value="30">
-<div class="value" id="yearsV">30 years</div></div>
+<div class="value" id="yearsV">30 years</div>
+</div>
 
-<div class="group"><label>Interest Rate %</label>
+<div class="group">
+<label>Interest Rate %</label>
 <input type="range" id="rate" min="1" max="15" step="0.125" value="6.5">
-<div class="value" id="rateV">6.5%</div></div>
+<div class="value" id="rateV">6.5%</div>
+</div>
 
-<div class="group"><label>Property Tax %</label>
+<div class="group">
+<label>Property Tax %</label>
 <input type="range" id="tax" min="0" max="5" step="0.1" value="1.2">
-<div class="value" id="taxV">1.2%</div></div>
+<div class="value" id="taxV">1.2%</div>
+</div>
 
-<div class="group"><label>PMI %</label>
+<div class="group">
+<label>PMI %</label>
 <input type="range" id="pmi" min="0" max="2" step="0.1" value="0.5">
-<div class="value" id="pmiV">0.5%</div></div>
+<div class="value" id="pmiV">0.5%</div>
+</div>
 
-<div class="group"><label>Insurance (annual)</label>
+<div class="group">
+<label>Insurance (annual)</label>
 <input type="range" id="ins" min="0" max="5000" step="100" value="1200">
-<div class="value" id="insV">$1,200</div></div>
+<div class="value" id="insV">$1,200</div>
+</div>
 
-<div class="group"><label>HOA (monthly)</label>
+<div class="group">
+<label>HOA (monthly)</label>
 <input type="range" id="hoa" min="0" max="1000" step="25" value="0">
-<div class="value" id="hoaV">$0</div></div>
+<div class="value" id="hoaV">$0</div>
+</div>
 
 <div class="actions">
 <button class="main" onclick="calculate()">Calculate</button>
 <button class="reset" onclick="location.reload()">Reset</button>
 </div>
+
 </div>
 </div>
 
@@ -197,17 +336,23 @@ Monthly Payment
 <!-- MORE -->
 <div class="panel">
 <div class="card">
+
 <h2>Amortization Schedule</h2>
 
 <div class="toggle">
-<button class="active" onclick="setView('monthly')">Monthly</button>
-<button onclick="setView('yearly')">Yearly</button>
+<button class="active" onclick="setView('monthly',this)">Monthly</button>
+<button onclick="setView('yearly',this)">Yearly</button>
 </div>
 
 <div class="table-wrap">
 <table>
 <thead>
-<tr><th>Period</th><th>Principal</th><th>Interest</th><th>Balance</th></tr>
+<tr>
+<th>Period</th>
+<th>Principal</th>
+<th>Interest</th>
+<th>Balance</th>
+</tr>
 </thead>
 <tbody id="table"></tbody>
 </table>
@@ -224,7 +369,8 @@ Monthly Payment
 </div>
 
 <script>
-let amort=[],view="monthly",line,pie;
+let amort=[],view="monthly",lineChart,pieChart;
+
 const fmt=(n,s)=>s+Math.round(n).toLocaleString();
 
 function showTab(i){
@@ -237,8 +383,8 @@ el.oninput=()=>{
 const s=currency.value;
 const id=el.id;
 document.getElementById(id+"V").textContent=
-id==="home"||id==="ins"||id==="hoa"?fmt(el.value,s):
-id==="years"?el.value+" years":el.value+"%";
+(id==="home"||id==="ins"||id==="hoa")?fmt(el.value,s):
+(id==="years")?el.value+" years":el.value+"%";
 };
 });
 
@@ -262,12 +408,14 @@ breakdown.innerHTML=`
 <div class="box"><small>Tax</small><strong>${fmt(taxM,s)}</strong></div>
 <div class="box"><small>PMI</small><strong>${fmt(pmiM,s)}</strong></div>
 <div class="box"><small>Insurance</small><strong>${fmt(insM,s)}</strong></div>
-<div class="box"><small>HOA</small><strong>${fmt(hoaM,s)}</strong></div>`;
+<div class="box"><small>HOA</small><strong>${fmt(hoaM,s)}</strong></div>
+`;
 
-amort=[];let bal=loan;
+amort=[];
+let bal=loan;
 for(let i=1;i<=n;i++){
-let interest=bal*r;
-let principal=pi-interest;
+const interest=bal*r;
+const principal=pi-interest;
 bal-=principal;
 amort.push({i,principal,interest,balance:Math.max(bal,0)});
 }
@@ -278,29 +426,42 @@ showTab(1);
 }
 
 function drawCharts(pi,tax,pmi,ins,hoa){
-line?.destroy();pie?.destroy();
+lineChart?.destroy();
+pieChart?.destroy();
 
-line=new Chart(lineChart,{
+lineChart=new Chart(lineChart,{
 type:"line",
 data:{
-labels:amort.filter((_,i)=>i%12===0).map((_,i)=>"Year "+i),
-datasets:[{data:amort.filter((_,i)=>i%12===0).map(x=>x.balance),borderColor:"#2c5aa0",fill:true}]
-}
+labels:amort.filter((_,i)=>i%12===0).map((_,i)=>`Year ${i+1}`),
+datasets:[{
+label:"Loan Balance",
+data:amort.filter((_,i)=>i%12===0).map(x=>x.balance),
+borderColor:"#2c5aa0",
+backgroundColor:"rgba(44,90,160,.15)",
+fill:true,
+tension:.35
+}]
+},
+options:{plugins:{legend:{display:false}}}
 });
 
-pie=new Chart(pieChart,{
+pieChart=new Chart(pieChart,{
 type:"doughnut",
 data:{
 labels:["P&I","Tax","PMI","Insurance","HOA"],
-datasets:[{data:[pi,tax,pmi,ins,hoa],backgroundColor:["#2c5aa0","#22c55e","#f59e0b","#06b6d4","#6b7280"]}]
-}
+datasets:[{
+data:[pi,tax,pmi,ins,hoa],
+backgroundColor:["#1e40af","#16a34a","#f59e0b","#0ea5e9","#6b7280"]
+}]
+},
+options:{cutout:"65%",plugins:{legend:{position:"bottom"}}}
 });
 }
 
-function setView(v){
+function setView(v,btn){
 view=v;
 document.querySelectorAll(".toggle button").forEach(b=>b.classList.remove("active"));
-event.target.classList.add("active");
+btn.classList.add("active");
 renderTable();
 }
 
@@ -310,25 +471,27 @@ const s=currency.value;
 
 if(view==="monthly"){
 amort.forEach(x=>{
-table.innerHTML+=`<tr>
+table.innerHTML+=`
+<tr>
 <td>Month ${x.i}</td>
-<td>${fmt(x.principal,s)}</td>
-<td>${fmt(x.interest,s)}</td>
-<td>${fmt(x.balance,s)}</td>
+<td class="principal">${fmt(x.principal,s)}</td>
+<td class="interest">${fmt(x.interest,s)}</td>
+<td class="balance">${fmt(x.balance,s)}</td>
 </tr>`;
 });
 }else{
-let yp=0,yi=0;
-amort.forEach((x,i)=>{
-yp+=x.principal;yi+=x.interest;
-if((i+1)%12===0){
-table.innerHTML+=`<tr>
-<td>Year ${(i+1)/12}</td>
-<td>${fmt(yp,s)}</td>
-<td>${fmt(yi,s)}</td>
-<td>${fmt(x.balance,s)}</td>
+let p=0,i=0,y=1;
+amort.forEach((x,idx)=>{
+p+=x.principal;i+=x.interest;
+if((idx+1)%12===0){
+table.innerHTML+=`
+<tr>
+<td>Year ${y++}</td>
+<td class="principal">${fmt(p,s)}</td>
+<td class="interest">${fmt(i,s)}</td>
+<td class="balance">${fmt(x.balance,s)}</td>
 </tr>`;
-yp=yi=0;
+p=i=0;
 }
 });
 }
@@ -346,5 +509,6 @@ a.download="mortgage_amortization.csv";
 a.click();
 }
 </script>
+
 </body>
 </html>
